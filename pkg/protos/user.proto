@@ -1,0 +1,59 @@
+syntax="proto3";
+
+package user.v1;
+
+option go_package = "github.com/north-fy/talker/services/user/pkg/protos/v1;userv1";
+
+
+service UserService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  rpc GetMe(GetMeRequest) returns (GetMeResponse);
+
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+// REGISTER
+message RegisterRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message RegisterResponse {
+  string user_id = 1;
+}
+
+// LOGIN
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string user_id = 1;
+  string token = 2;
+}
+
+// GETME
+message GetMeRequest {
+  string token = 1;
+}
+
+message GetMeResponse {
+  string user_id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+// VALIDATE
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool is_valid = 1;
+}
+

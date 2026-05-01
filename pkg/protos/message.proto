@@ -1,0 +1,277 @@
+// proto/message/message.proto
+syntax = "proto3";
+
+package message.v1;
+
+option go_package = "github.com/north-fy/talker/services/message/pkg/protos/v1;messagev1";
+
+import "timestamp.proto";
+
+// ==================== MESSAGE SERVICE ====================
+service MessageService {
+  // Отправка сообщения
+  rpc SendMessage(SendMessageRequest) returns (Message);
+
+  // Получение сообщений чата
+  rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+
+  // Редактирование сообщения
+  rpc EditMessage(EditMessageRequest) returns (Message);
+
+  // Удаление сообщения
+  rpc DeleteMessage(DeleteMessageRequest) returns (Empty);
+
+  // Получить одно сообщение
+  rpc GetMessage(GetMessageRequest) returns (Message);
+
+  // Добавить реакцию (лайк, смайлик)
+  rpc AddReaction(AddReactionRequest) returns (Reaction);
+
+  // Удалить реакцию
+  rpc RemoveReaction(RemoveReactionRequest) returns (Empty);
+
+  // Поиск сообщений
+  rpc SearchMessages(SearchMessagesRequest) returns (SearchMessagesResponse);
+
+  // Отметить сообщения как прочитанные
+  rpc MarkAsRead(MarkAsReadRequest) returns (Empty);
+
+  // Получить количество непрочитанных
+  rpc GetUnreadCount(GetUnreadCountRequest) returns (GetUnreadCountResponse);
+
+  // WebSocket соединение (стриминг сообщений в реальном времени)
+  rpc ConnectWebSocket(ConnectWebSocketRequest) returns (stream WebSocketMessage);
+
+  // Внутренние методы для других сервисов (gRPC only)
+  rpc GetLastMessage(GetLastMessageRequest) returns (Message) {
+    // Для Chat Service - получить последнее сообщение в чате
+  }
+
+  rpc DeleteChatMessages(DeleteChatMessagesRequest) returns (Empty) {
+    // Для Chat Service - удалить все сообщения чата
+  }
+}
+
+message Empty {}
+
+// ==================== REQUEST/RESPONSE MESSAGES ====================
+
+// Отправка сообщения
+message SendMessageRequest {
+  string chat_id = 1;              // ID чата
+  string content = 2;              // Текст сообщения
+  MessageType type = 3;            // Тип сообщения (text, image, file)
+  string reply_to = 4;             // ID сообщения, на которое отвечаем (опционально)
+  repeated string attachments = 5; // Список ID вложений (из File Service)
+}
+
+// Получение сообщений чата
+message GetMessagesRequest {
+  string chat_id = 1;              // ID чата
+  int32 limit = 2;                 // Сколько сообщений (max 100)
+  string before = 3;               // Пагинация: ID сообщения, до которого грузить
+  string after = 4;                // Пагинация: ID сообщения, после которого грузить
+}
+
+message GetMessagesResponse {
+  repeated Message messages = 1;
+  bool has_more = 2;               // Есть ли ещё сообщения
+  int32 total_count = 3;           // Общее количество (опционально)
+}
+
+// Редактирование сообщения
+message EditMessageRequest {
+  string message_id = 1;
+  string content = 2;              // Новый текст
+}
+
+// Удаление сообщения
+message DeleteMessageRequest {
+  string message_id = 1;
+  bool for_everyone = 2;           // Удалить у всех (true) или только у себя (false)
+}
+
+// Получить одно сообщение
+message GetMessageRequest {
+  string message_id = 1;
+}
+
+// Реакции
+message AddReactionRequest {
+  string message_id = 1;
+  string reaction = 2;             // Смайлик: "❤️", "👍", "😂" и т.д.
+}
+
+message RemoveReactionRequest {
+  string message_id = 1;
+  string reaction = 2;
+}
+
+message GetReactionsRequest {
+  string message_id = 1;
+}
+
+message GetReactionsResponse {
+  map<string, ReactionCount> reactions = 1;  // reaction -> количество
+}
+
+message ReactionCount {
+  string reaction = 1;
+  int32 count = 2;
+  repeated string user_ids = 3;    // Кто поставил (первые 10)
+}
+
+// Поиск сообщений
+message SearchMessagesRequest {
+  string chat_id = 1;              // Опционально: поиск только в конкретном чате
+  string query = 2;                // Поисковый запрос
+  int32 limit = 3;                 // Максимум результатов (max 50)
+  string before = 4;               // Пагинация
+}
+
+message SearchMessagesResponse {
+  repeated Message messages = 1;
+  bool has_more = 2;
+}
+
+// Отметить как прочитанное
+message MarkAsReadRequest {
+  string chat_id = 1;
+  string user_id = 2;              // Будет из контекста, но оставим для ясности
+  string up_to_message_id = 3;     // До какого сообщения прочитано
+}
+
+// Непрочитанные сообщения
+message GetUnreadCountRequest {
+  string chat_id = 1;
+  string user_id = 2;
+}
+
+message GetUnreadCountResponse {
+  int32 count = 1;
+  string last_message_id = 2;      // ID последнего непрочитанного
+}
+
+// WebSocket
+message ConnectWebSocketRequest {
+  string chat_id = 1;
+  string user_id = 2;
+  string token = 3;                // JWT токен для аутентификации
+}
+
+message WebSocketMessage {
+  oneof event {
+    NewMessageEvent new_message = 1;
+    MessageUpdatedEvent message_updated = 2;
+    MessageDeletedEvent message_deleted = 3;
+    ReactionAddedEvent reaction_added = 4;
+    ReactionRemovedEvent reaction_removed = 5;
+    TypingEvent typing = 6;
+    ReadReceiptEvent read_receipt = 7;
+  }
+}
+
+// Внутренние методы
+message GetLastMessageRequest {
+  string chat_id = 1;
+}
+
+message DeleteChatMessagesRequest {
+  string chat_id = 1;
+}
+
+// ==================== ENTITIES ====================
+
+// Сообщение
+message Message {
+  string id = 1;
+  string chat_id = 2;
+  string sender_id = 3;
+  string content = 4;
+  MessageType type = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  bool is_edited = 8;
+  bool is_deleted = 9;
+  string reply_to = 10;            // ID сообщения, на которое отвечаем
+  ReplyInfo reply_info = 11;       // Информация о сообщении-ответе
+  repeated string attachments = 12; // Список ID вложений
+  map<string, int32> reactions = 13; // Счётчики реакций { "❤️": 5, "👍": 2 }
+}
+
+// Информация о сообщении-ответе (опционально, подгружается при запросе)
+message ReplyInfo {
+  string message_id = 1;
+  string sender_name = 2;          // Имя отправителя (из User Service)
+  string content_preview = 3;      // Превью текста (первые 50 символов)
+}
+
+// Реакция
+message Reaction {
+  string message_id = 1;
+  string user_id = 2;
+  string reaction = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+// Типы сообщений
+enum MessageType {
+  MESSAGE_TYPE_UNKNOWN = 0;
+  MESSAGE_TYPE_TEXT = 1;           // Обычный текст
+  MESSAGE_TYPE_IMAGE = 2;          // Изображение
+  MESSAGE_TYPE_FILE = 3;           // Файл
+  MESSAGE_TYPE_STICKER = 4;        // Стикер
+  MESSAGE_TYPE_SYSTEM = 5;         // Системное сообщение (user joined, etc)
+}
+
+// ==================== WEBSOCKET EVENTS ====================
+
+// Новое сообщение
+message NewMessageEvent {
+  Message message = 1;
+}
+
+// Обновление сообщения
+message MessageUpdatedEvent {
+  string message_id = 1;
+  string new_content = 2;
+  google.protobuf.Timestamp updated_at = 3;
+}
+
+// Удаление сообщения
+message MessageDeletedEvent {
+  string message_id = 1;
+  bool for_everyone = 2;
+}
+
+// Добавлена реакция
+message ReactionAddedEvent {
+  string message_id = 1;
+  string user_id = 2;
+  string reaction = 3;
+  int32 new_count = 4;
+}
+
+// Удалена реакция
+message ReactionRemovedEvent {
+  string message_id = 1;
+  string user_id = 2;
+  string reaction = 3;
+  int32 new_count = 4;
+}
+
+// Пользователь печатает
+message TypingEvent {
+  string chat_id = 1;
+  string user_id = 2;
+  string username = 3;
+  bool is_typing = 4;              // true - начал печатать, false - перестал
+}
+
+// Подтверждение прочтения
+message ReadReceiptEvent {
+  string chat_id = 1;
+  string user_id = 2;
+  string read_up_to_message_id = 3;
+  google.protobuf.Timestamp read_at = 4;
+}

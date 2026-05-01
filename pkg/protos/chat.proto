@@ -1,0 +1,319 @@
+// proto/chat/chat.proto
+syntax = "proto3";
+
+package chat.v1;
+
+option go_package = "github.com/north-fy/talker/services/chat/pkg/protos/v1;chatv1";
+
+import "timestamp.proto";
+
+// ==================== CHAT SERVICE ====================
+service ChatService {
+  // Управление чатами
+  rpc CreateChat(CreateChatRequest) returns (Chat);
+
+  rpc GetChat(GetChatRequest) returns (Chat);
+
+  rpc GetChats(GetChatsRequest) returns (GetChatsResponse);
+
+  rpc UpdateChat(UpdateChatRequest) returns (Chat);
+
+  // Управление участниками
+  rpc AddMember(AddMemberRequest) returns (Member);
+
+  rpc RemoveMember(RemoveMemberRequest) returns (Empty);
+
+  rpc GetMembers(GetMembersRequest) returns (GetMembersResponse);
+
+  rpc UpdateMemberRole(UpdateMemberRoleRequest) returns (Member);
+
+  rpc GetMember(GetMemberRequest) returns (Member);
+
+  // Проверки (для других сервисов)
+  rpc IsMember(IsMemberRequest) returns (IsMemberResponse);
+
+  rpc GetUserChats(GetUserChatsRequest) returns (GetUserChatsResponse);
+
+  // Приглашения
+  rpc CreateInviteLink(CreateInviteLinkRequest) returns (InviteLink);
+
+  rpc JoinChatByInvite(JoinChatByInviteRequest) returns (Chat);
+
+  rpc RevokeInviteLink(RevokeInviteLinkRequest) returns (Empty);
+
+  // Внутренние методы для других сервисов (gRPC only)
+  rpc GetChatInternal(GetChatInternalRequest) returns (ChatInternal) {
+    // Для Message Service
+  }
+
+  rpc GetChatsInternal(GetChatsInternalRequest) returns (GetChatsInternalResponse) {
+    // Для массовых операций
+  }
+
+  rpc ValidateMemberAccess(ValidateMemberAccessRequest) returns (ValidateMemberAccessResponse) {
+    // Проверка прав для Message Service
+  }
+}
+
+message Empty {}
+
+// ==================== REQUEST/RESPONSE MESSAGES ====================
+
+// Create Chat
+message CreateChatRequest {
+  string name = 1;                    // Название чата
+  ChatType type = 2;                  // private/group/channel
+  repeated string member_ids = 3;     // ID участников (включая создателя)
+  string avatar_base64 = 4;           // Опционально: аватар чата
+}
+
+message Chat {
+  string id = 1;
+  string name = 2;
+  ChatType type = 3;
+  string created_by = 4;
+  string avatar_url = 5;
+  int32 members_count = 6;
+  Message last_message = 7;           // Последнее сообщение (опционально)
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+// Get Chat
+message GetChatRequest {
+  string chat_id = 1;
+  bool include_members = 2;           // Загрузить участников?
+}
+
+// Get Chats (with pagination)
+message GetChatsRequest {
+  ChatFilter filter = 1;
+}
+
+message ChatFilter {
+  ChatType type = 1;                  // Тип чата
+  string search = 2;                  // Поиск по названию
+  repeated string chat_ids = 3;       // Конкретные чаты
+  bool include_archived = 4;          // Включать архивные?
+}
+
+message GetChatsResponse {
+  repeated Chat chats = 1;
+  int64 total_count = 2;
+}
+
+// Update Chat
+message UpdateChatRequest {
+  string chat_id = 1;
+  optional string name = 2;
+  optional string avatar_base64 = 3;
+}
+
+// Member Management
+message AddMemberRequest {
+  string chat_id = 1;
+  string user_id = 2;
+  Role role = 3;                      // По умолчанию MEMBER
+  string invited_by = 4;              // Кто пригласил
+}
+
+message RemoveMemberRequest {
+  string chat_id = 1;
+  string user_id = 2;
+}
+
+message GetMembersRequest {
+  string chat_id = 1;
+  MemberFilter filter = 2;
+}
+
+message MemberFilter {
+  Role role = 1;                      // Фильтр по роли
+  string search = 2;                  // Поиск по имени
+}
+
+message GetMembersResponse {
+  repeated Member members = 1;
+  int64 total_count = 2;
+}
+
+message UpdateMemberRoleRequest {
+  string chat_id = 1;
+  string user_id = 2;
+  Role role = 3;
+}
+
+message GetMemberRequest {
+  string chat_id = 1;
+  string user_id = 2;
+}
+
+message Member {
+  string user_id = 1;
+  string chat_id = 2;
+  Role role = 3;
+  google.protobuf.Timestamp joined_at = 4;
+  google.protobuf.Timestamp last_read_at = 5;
+  int64 unread_count = 6;
+  // Данные пользователя (опционально, для REST)
+  string username = 7;
+  string full_name = 8;
+  string avatar_url = 9;
+}
+
+// Is Member (для других сервисов)
+message IsMemberRequest {
+  string chat_id = 1;
+  string user_id = 2;
+}
+
+message IsMemberResponse {
+  bool is_member = 1;
+  Role role = 2;
+}
+
+// Get User Chats
+message GetUserChatsRequest {
+  string user_id = 1;
+  bool include_last_message = 2;      // Включить последнее сообщение?
+}
+
+message GetUserChatsResponse {
+  repeated UserChat user_chats = 1;
+  int64 total_count = 2;
+}
+
+message UserChat {
+  Chat chat = 1;
+  Member member_info = 2;              // Информация о пользователе в чате
+  Message last_message = 3;            // Последнее сообщение (опционально)
+  int64 unread_count = 4;
+}
+
+// Chat Settings
+message UpdateChatSettingsRequest {
+  string chat_id = 1;
+  ChatSettings settings = 2;
+}
+
+message GetChatSettingsRequest {
+  string chat_id = 1;
+}
+
+message ChatSettings {
+  bool is_private = 1;                 // Закрытый чат (только по инвайту)
+  bool allow_messages_from_all = 2;    // Могут писать все участники?
+  bool allow_media = 3;                // Разрешены медиафайлы?
+  bool allow_reactions = 4;            // Разрешены реакции?
+  int32 message_ttl_seconds = 5;       // Автоудаление сообщений (0 = без удаления)
+  string language = 6;                 // Язык чата (для переводов)
+  bool is_announcement = 7;            // Только админы могут писать?
+}
+
+// Invite Links
+message CreateInviteLinkRequest {
+  string chat_id = 1;
+  int32 max_uses = 2;                  // Максимум использований (0 = без лимита)
+  google.protobuf.Timestamp expires_at = 3;  // Когда истекает
+}
+
+message InviteLink {
+  string id = 1;
+  string chat_id = 2;
+  string code = 3;                     // Короткий код для ссылки
+  string url = 4;                      // Полная ссылка
+  int32 max_uses = 5;
+  int32 used_count = 6;
+  google.protobuf.Timestamp expires_at = 7;
+  google.protobuf.Timestamp created_at = 8;
+  string created_by = 9;
+  bool is_active = 10;
+}
+
+message JoinChatByInviteRequest {
+  string invite_code = 1;
+  string user_id = 2;                  // Из контекста
+}
+
+message RevokeInviteLinkRequest {
+  string chat_id = 1;
+  string invite_id = 2;
+}
+
+// Internal Messages (для других сервисов)
+message GetChatInternalRequest {
+  string chat_id = 1;
+  bool include_members = 2;
+}
+
+message ChatInternal {
+  string id = 1;
+  string name = 2;
+  ChatType type = 3;
+  bool is_active = 4;
+  repeated string member_ids = 5;      // Список ID участников
+  ChatSettings settings = 6;
+}
+
+message GetChatsInternalRequest {
+  repeated string chat_ids = 1;
+}
+
+message GetChatsInternalResponse {
+  map<string, ChatInternal> chats = 1; // chat_id -> ChatInternal
+}
+
+message ValidateMemberAccessRequest {
+  string chat_id = 1;
+  string user_id = 2;
+  PermissionType required_permission = 3;
+}
+
+enum PermissionType {
+  PERMISSION_UNKNOWN = 0;
+  PERMISSION_READ = 1;         // Читать сообщения
+  PERMISSION_WRITE = 2;        // Отправлять сообщения
+  PERMISSION_DELETE = 3;       // Удалять сообщения
+  PERMISSION_MANAGE_MEMBERS = 4; // Управлять участниками
+  PERMISSION_UPDATE_SETTINGS = 5; // Изменять настройки
+}
+
+message ValidateMemberAccessResponse {
+  bool has_access = 1;
+  Role role = 2;
+  string reason = 3;            // Если нет доступа, причина
+}
+
+// Last Read
+message UpdateLastReadRequest {
+  string chat_id = 1;
+  string user_id = 2;
+  string message_id = 3;        // Последнее прочитанное сообщение
+}
+
+// ==================== ENUMS & TYPES ====================
+
+enum ChatType {
+  CHAT_TYPE_UNKNOWN = 0;
+  CHAT_TYPE_PRIVATE = 1;        // Диалог 1-на-1
+  CHAT_TYPE_GROUP = 2;          // Групповой чат
+  CHAT_TYPE_CHANNEL = 3;        // Канал (только вещание)
+}
+
+enum Role {
+  ROLE_UNKNOWN = 0;
+  ROLE_MEMBER = 1;              // Обычный участник
+  ROLE_MODERATOR = 2;           // Модератор (может удалять сообщения)
+  ROLE_ADMIN = 3;               // Администратор (управление чатом)
+  ROLE_OWNER = 4;               // Владелец (полный контроль)
+}
+
+// Message (ссылка на Message Service)
+message Message {
+  string id = 1;
+  string chat_id = 2;
+  string sender_id = 3;
+  string content = 4;
+  google.protobuf.Timestamp created_at = 5;
+  // Минимальная информация, полное сообщение в Message Service
+}

@@ -1,0 +1,201 @@
+// proto/poll/poll.proto
+syntax = "proto3";
+
+package poll.v1;
+
+option go_package = "github.com/north-fy/talker/services/poll/pkg/protos/v1;pollv1";
+
+import "timestamp.proto";
+
+// ==================== POLL SERVICE ====================
+service PollService {
+  // Управление опросами
+  rpc CreatePoll(CreatePollRequest) returns (Poll);
+
+  rpc GetPoll(GetPollRequest) returns (Poll);
+
+  rpc UpdatePoll(UpdatePollRequest) returns (Poll);
+
+  rpc DeletePoll(DeletePollRequest) returns (Empty);
+
+  rpc GetChatPolls(GetChatPollsRequest) returns (GetChatPollsResponse);
+
+  // Голосование
+  rpc Vote(VoteRequest) returns (VoteResponse);
+
+  rpc Unvote(UnvoteRequest) returns (Empty);
+
+  rpc GetResults(GetResultsRequest) returns (PollResults);
+
+  rpc GetMyVote(GetMyVoteRequest) returns (GetMyVoteResponse);
+
+  // Закрытие/открытие
+  rpc ClosePoll(ClosePollRequest) returns (Poll);
+
+  rpc ReopenPoll(ReopenPollRequest) returns (Poll);
+
+  // Внутренние методы для других сервисов
+  rpc GetPollInternal(GetPollInternalRequest) returns (PollInternal) {
+    // Для Message Service - получить информацию об опросе
+  }
+}
+
+message Empty {}
+
+// ==================== REQUEST/RESPONSE MESSAGES ====================
+
+// Создание опроса
+message CreatePollRequest {
+  string chat_id = 1;                  // ID чата
+  string question = 2;                // Вопрос опроса
+  repeated string options = 3;        // Варианты ответов (минимум 2, максимум 10)
+  PollSettings settings = 4;          // Настройки опроса
+}
+
+message Poll {
+  string id = 1;
+  string chat_id = 2;
+  string created_by = 3;               // ID создателя
+  string question = 4;
+  repeated PollOption options = 5;
+  PollSettings settings = 6;
+  PollStatus status = 7;               // active/closed
+  int32 total_votes = 8;               // Общее количество голосов
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  google.protobuf.Timestamp closed_at = 11;
+}
+
+message PollOption {
+  string id = 1;                       // ID варианта (опционально)
+  string text = 2;                     // Текст варианта
+  int32 votes_count = 3;               // Количество голосов
+  double percentage = 4;               // Процент (0-100)
+}
+
+message PollSettings {
+  bool is_anonymous = 1;               // Анонимное голосование (по умолчанию false)
+  bool allow_multiple = 2;             // Можно выбрать несколько вариантов (по умолчанию false)
+  int32 max_votes = 3;                 // Максимум голосов (если allow_multiple = true)
+  bool allow_change_vote = 4;          // Можно менять голос (по умолчанию true)
+  google.protobuf.Timestamp ends_at = 5; // Когда заканчивается (опционально)
+  bool show_results_before_end = 6;     // Показывать результаты до окончания (по умолчанию true)
+  bool show_who_voted = 7;              // Показывать кто голосовал (по умолчанию false)
+}
+
+enum PollStatus {
+  POLL_STATUS_UNKNOWN = 0;
+  POLL_STATUS_ACTIVE = 1;               // Активный
+  POLL_STATUS_CLOSED = 2;               // Закрыт
+}
+
+// Получение опроса
+message GetPollRequest {
+  string poll_id = 1;
+  bool include_results = 2;              // Включить результаты (по умолчанию true)
+}
+
+// Обновление опроса
+message UpdatePollRequest {
+  string poll_id = 1;
+  optional string question = 2;          // Новый вопрос
+  repeated string options = 3;           // Новые варианты (перезапишет существующие)
+  optional PollSettings settings = 4;    // Новые настройки
+}
+
+// Удаление опроса
+message DeletePollRequest {
+  string poll_id = 1;
+}
+
+// Получить опросы чата
+message GetChatPollsRequest {
+  string chat_id = 1;
+  int32 limit = 2;                       // Максимум опросов (max 50)
+  PollStatus status = 3;                 // Фильтр по статусу
+  string before = 4;                     // Пагинация: ID опроса, до которого грузить
+}
+
+message GetChatPollsResponse {
+  repeated Poll polls = 1;
+  bool has_more = 2;
+}
+
+// Голосование
+message VoteRequest {
+  string poll_id = 1;
+  repeated string option_ids = 2;        // ID выбранных вариантов (если allow_multiple)
+  repeated int32 option_indexes = 3;     // ИЛИ индексы вариантов (0-based)
+}
+
+message VoteResponse {
+  PollResults results = 1;               // Обновлённые результаты
+  bool vote_updated = 2;                 // Был ли обновлён предыдущий голос
+}
+
+// Отмена голоса
+message UnvoteRequest {
+  string poll_id = 1;
+}
+
+// Результаты
+message GetResultsRequest {
+  string poll_id = 1;
+  bool include_voters = 2;               // Включить список проголосовавших (если разрешено)
+}
+
+message PollResults {
+  string poll_id = 1;
+  string question = 2;
+  repeated PollOption options = 3;
+  int32 total_votes = 4;
+  PollStatus status = 5;
+  map<string, OptionVoters> voters = 6;  // option_id -> список проголосовавших (если не анонимно)
+}
+
+message OptionVoters {
+  repeated string user_ids = 1;
+  repeated VoterInfo voters_info = 2;    // Детальная информация о пользователях
+}
+
+message VoterInfo {
+  string user_id = 1;
+  string username = 2;
+  string full_name = 3;
+  string avatar_url = 4;
+}
+
+// Мой голос
+message GetMyVoteRequest {
+  string poll_id = 1;
+}
+
+message GetMyVoteResponse {
+  bool has_voted = 1;
+  repeated string option_ids = 2;        // ID выбранных вариантов
+  repeated int32 option_indexes = 3;     // Индексы выбранных вариантов
+  google.protobuf.Timestamp voted_at = 4;
+}
+
+// Закрытие/открытие
+message ClosePollRequest {
+  string poll_id = 1;
+}
+
+message ReopenPollRequest {
+  string poll_id = 1;
+}
+
+// Внутренние методы
+message GetPollInternalRequest {
+  string poll_id = 1;
+}
+
+message PollInternal {
+  string id = 1;
+  string chat_id = 2;
+  string question = 3;
+  repeated string options = 4;           // Только тексты вариантов
+  PollStatus status = 5;
+  google.protobuf.Timestamp ends_at = 6;
+}
