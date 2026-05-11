@@ -24,9 +24,10 @@ const (
 // REGISTER
 type RegisterRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	FirstName     string                 `protobuf:"bytes,1,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                 `protobuf:"bytes,2,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -61,9 +62,16 @@ func (*RegisterRequest) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *RegisterRequest) GetName() string {
+func (x *RegisterRequest) GetFirstName() string {
 	if x != nil {
-		return x.Name
+		return x.FirstName
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetLastName() string {
+	if x != nil {
+		return x.LastName
 	}
 	return ""
 }
@@ -84,7 +92,7 @@ func (x *RegisterRequest) GetPassword() string {
 
 type RegisterResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -119,11 +127,11 @@ func (*RegisterResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *RegisterResponse) GetUserId() string {
+func (x *RegisterResponse) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 // LOGIN
@@ -181,7 +189,7 @@ func (x *LoginRequest) GetPassword() string {
 
 type LoginResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -217,11 +225,11 @@ func (*LoginResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *LoginResponse) GetUserId() string {
+func (x *LoginResponse) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *LoginResponse) GetToken() string {
@@ -278,9 +286,10 @@ func (x *GetMeRequest) GetToken() string {
 
 type GetMeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -315,16 +324,23 @@ func (*GetMeResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetMeResponse) GetUserId() string {
+func (x *GetMeResponse) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
+	}
+	return 0
+}
+
+func (x *GetMeResponse) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
 	}
 	return ""
 }
 
-func (x *GetMeResponse) GetName() string {
+func (x *GetMeResponse) GetLastName() string {
 	if x != nil {
-		return x.Name
+		return x.LastName
 	}
 	return ""
 }
@@ -430,25 +446,29 @@ var File_user_proto protoreflect.FileDescriptor
 const file_user_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"user.proto\x12\auser.v1\"W\n" +
-	"\x0fRegisterRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x03 \x01(\tR\bpassword\"+\n" +
+	"user.proto\x12\auser.v1\"\x7f\n" +
+	"\x0fRegisterRequest\x12\x1d\n" +
+	"\n" +
+	"first_name\x18\x01 \x01(\tR\tfirstName\x12\x1b\n" +
+	"\tlast_name\x18\x02 \x01(\tR\blastName\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1a\n" +
+	"\bpassword\x18\x04 \x01(\tR\bpassword\"+\n" +
 	"\x10RegisterResponse\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"@\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\">\n" +
 	"\rLoginResponse\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x14\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x14\n" +
 	"\x05token\x18\x02 \x01(\tR\x05token\"$\n" +
 	"\fGetMeRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"R\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"z\n" +
 	"\rGetMeResponse\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\",\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1d\n" +
+	"\n" +
+	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
+	"\tlast_name\x18\x03 \x01(\tR\blastName\x12\x14\n" +
+	"\x05email\x18\x04 \x01(\tR\x05email\",\n" +
 	"\x14ValidateTokenRequest\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\"2\n" +
 	"\x15ValidateTokenResponse\x12\x19\n" +
