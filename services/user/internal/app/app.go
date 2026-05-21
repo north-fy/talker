@@ -1,23 +1,26 @@
 package app
 
 import (
-	"log/slog"
+	"context"
 
 	grpcapp "github.com/north-fy/talker/services/user/internal/app/grpc"
+	"github.com/north-fy/talker/services/user/internal/config"
+	"github.com/north-fy/talker/services/user/internal/service"
+	"github.com/north-fy/talker/services/user/internal/storage/postgres"
+	"go.uber.org/zap"
 )
 
 type App struct {
 	GRPCSrv *grpcapp.App
 }
 
-type ConfigDatabase struct {
-	Host     string
-	User     string
-	Password string
-	SSLmode  string
-}
+func New(ctx context.Context, log *zap.Logger, grpcPort int, cfgDB config.PostgresCfg) *App {
+	db := postgres.NewStorage(ctx, cfgDB)
+	serv := service.NewService(log, db)
 
-func New(log *slog.Logger, grpcPort int, cfgDB ConfigDatabase) *App {
-	// TODO: init db + service
-	panic("implement me")
+	app := grpcapp.New(log, serv, grpcPort)
+
+	return &App{
+		GRPCSrv: app,
+	}
 }

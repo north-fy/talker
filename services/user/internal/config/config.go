@@ -1,9 +1,24 @@
 package config
 
+import "go-simpler.org/env"
+
+type Config struct {
+	PostgresCfg PostgresCfg `env:"POSTGRES_"`
+	GRPCCfg     GRPCCfg     `env:"GRPC_"`
+}
+
 type PostgresCfg struct {
-	Host     string `env:"POSTGRES_HOST"`
-	Port     int    `env:"POSTGRES_PORT"`
-	User     string `env:"POSTGRES_USER"`
-	Password string `env:"POSTGRES_PASSWORD"`
-	DBName   string `env:"POSTGRES_DB"`
+	Host     string `env:"HOST"`
+	Port     int    `env:"PORT"`
+	User     string `env:"USER"`
+	Password string `env:"PASSWORD"`
+	DBName   string `env:"DB"`
+}
+
+type GRPCCfg struct {
+	Port int `env:"PORT"`
+}
+
+func (c *Config) Load() error {
+	return env.Load(&c, nil)
 }

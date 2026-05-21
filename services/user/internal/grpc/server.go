@@ -12,7 +12,7 @@ import (
 
 type UserService interface {
 	Register(ctx context.Context, user models.User) (int64, error)
-	Login(ctx context.Context, user models.User) (models.Session, error)
+	Login(ctx context.Context, user models.UserLogin) (models.Session, error)
 	GetMe(ctx context.Context, token string) (models.User, error)
 	ValidateToken(ctx context.Context, token string) (bool, error)
 }
@@ -47,7 +47,7 @@ func (s *serverAPI) Register(ctx context.Context, req *userv1.RegisterRequest) (
 func (s *serverAPI) Login(ctx context.Context, req *userv1.LoginRequest) (*userv1.LoginResponse, error) {
 	// TODO: обработка ошибок err
 
-	user := models.User{
+	user := models.UserLogin{
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
 	}

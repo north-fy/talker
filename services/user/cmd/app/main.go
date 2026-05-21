@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
+
 	logger, err := zap.NewProduction()
 	if err != nil {
 		panic(err)
