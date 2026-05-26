@@ -21,3 +21,7 @@ rebuild:
 .PHONY: logs
 logs:
 	docker-compose logs
+
+.PHONY: migrations
+migrations:
+	migrate -path=/migrations -database="postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" up

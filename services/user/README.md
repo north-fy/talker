@@ -2,7 +2,7 @@
 
 Сервис аутентификации и управления пользователями.
 
-## 🎯 Функционал
+## Функционал
 
 ### Регистрация и вход
 - `Register` — регистрация нового пользователя
@@ -10,7 +10,7 @@
 - `GetMe` — получение информации о текущем пользователе
 - `ValidateToken` — валидация JWT токена (для других сервисов)
 
-## 🗄️ База данных
+## База данных - Postgresql
 
 ### Таблицы
 
@@ -24,3 +24,18 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+```
+
+## How to use
+### Локальный запуск 
+```bash
+$ copy .env.example .env
+$ make migrations
+$ go build -o main ./cmd/server/
+$ ./cmd/server/main
+```
+
+### Docker 
+```bash
+$ make rebuild
+```
