@@ -2,27 +2,21 @@ version: '2'
 run:
   timeout: 5m
   tests: false
-  skip-files:
-    - ".*\\.pb\\.go$"
-
 linters:
-  disable-all: true
   enable:
     - errcheck
     - gosimple
-    - gosec
+    - gosec 
     - govet
     - ineffassign
     - staticcheck
     - revive
-
 formatters:
   enable:
     - gci
     - gofmt
     - gofumpt
     - swaggo
-
 issues:
   max-issues-per-linter: 50
   fix: false
