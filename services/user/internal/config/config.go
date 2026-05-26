@@ -20,5 +20,5 @@ type GRPCCfg struct {
 }
 
 func (c *Config) Load() error {
-	return env.Load(&c, nil)
+	return env.Load(c, nil)
 }

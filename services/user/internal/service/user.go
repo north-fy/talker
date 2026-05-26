@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/north-fy/talker/services/user/internal/config"
@@ -12,8 +11,6 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var validate *validator.Validate
 
 type Service struct {
 	log     *zap.Logger
@@ -34,6 +31,7 @@ func NewService(log *zap.Logger, storage Storage) *Service {
 
 func (s *Service) Register(ctx context.Context, user models.User) (int64, error) {
 	s.log = s.log.With(zap.Any("model.User", user))
+	validate := validator.New()
 
 	if err := validate.Struct(user); err != nil {
 		s.log.Error("validation failed", zap.Error(err))
@@ -73,7 +71,7 @@ func (s *Service) Login(ctx context.Context, user models.UserLogin) (models.Sess
 		return models.Session{}, err
 	}
 
-	token, err := utils.GenerateToken(strconv.Itoa(int(userResp.UID)), userResp.Email, "user")
+	token, err := utils.GenerateToken(userResp, "user")
 	if err != nil {
 		s.log.Error("token doesn't generate", zap.Error(err))
 		return models.Session{}, err
@@ -105,11 +103,11 @@ func (s *Service) GetMe(ctx context.Context, token string) (models.User, error) 
 	// TODO: delete token in args GetMe
 	_ = token
 
-	userID, _ := strconv.Atoi(claims.(utils.UserClaims).UserID)
-
 	return models.User{
-		UID:   int64(userID),
-		Email: claims.(utils.UserClaims).Email,
+		UID:       claims.User.UID,
+		FirstName: claims.User.FirstName,
+		LastName:  claims.User.LastName,
+		Email:     claims.User.Email,
 	}, nil
 }
 

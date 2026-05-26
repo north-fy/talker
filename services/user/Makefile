@@ -5,3 +5,19 @@ gen:
         --go-grpc_out=. --go-grpc_opt=paths=source_relative \
         --grpc-gateway_out=. --grpc-gateway_opt=paths=source_relative \
         pkg/protos/user.proto
+
+.PHONY: up
+up:
+	docker-compose up -d
+
+.PHONY: down
+down:
+	docker-compose down
+
+.PHONY: rebuild
+rebuild:
+	docker-compose up -d --build
+
+.PHONY: logs
+logs:
+	docker-compose logs

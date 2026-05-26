@@ -5,12 +5,23 @@ import (
 	"strings"
 
 	"github.com/north-fy/talker/services/user/pkg/utils"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
 var AuthFunc = func(ctx context.Context) (context.Context, error) {
+	publicMethods := map[string]bool{
+		"/user.v1.UserService/Register": true,
+		"/user.v1.UserService/Login":    true,
+	}
+
+	method, ok := grpc.Method(ctx)
+	if ok && publicMethods[method] {
+		return ctx, nil
+	}
+
 	// Извлекаем metadata
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -29,7 +40,6 @@ var AuthFunc = func(ctx context.Context) (context.Context, error) {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
 	}
 
-	// Отправляем string токен для дальнейшей работы сервиса ValidateToken
 	ctx = context.WithValue(ctx, "token", token)
 	return ctx, nil
 }

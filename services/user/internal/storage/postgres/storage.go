@@ -42,6 +42,7 @@ func (s *Storage) InsertUser(ctx context.Context, user models.User) (int64, erro
 	VALUES ($1, $2, $3, $4)
 	RETURNING id
 	`
+
 	var id int64
 	if err := s.conn.QueryRow(ctx, query, user.FirstName, user.LastName, user.Email, user.Password).Scan(&id); err != nil {
 		return 0, err
@@ -58,7 +59,7 @@ func (s *Storage) SelectUserByEmail(ctx context.Context, email string) (models.U
 	`
 
 	var user models.User
-	if err := s.conn.QueryRow(ctx, query, email).Scan(&user); err != nil {
+	if err := s.conn.QueryRow(ctx, query, email).Scan(&user.UID, &user.FirstName, &user.LastName, &user.Email, &user.Password); err != nil {
 		return models.User{}, err
 	}
 
