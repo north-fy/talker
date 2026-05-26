@@ -29,7 +29,7 @@ CREATE TABLE users (
 ## How to use
 ### Локальный запуск 
 ```bash
-$ copy .env.example .env
+$ cp .env.example .env
 $ make migrations
 $ go build -o main ./cmd/server/
 $ ./cmd/server/main
