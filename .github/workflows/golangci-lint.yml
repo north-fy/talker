@@ -30,7 +30,8 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: go work sync
+        working-directory: ${{ matrix.module.path }}
+        run: go mod download
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6

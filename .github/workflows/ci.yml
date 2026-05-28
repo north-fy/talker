@@ -30,7 +30,8 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: go work sync
+        working-directory: ${{ matrix.module.path }}
+        run: go mod download
 
       - name: Run tests
         working-directory: ${{ matrix.module.path }}
@@ -66,7 +67,8 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        run: go work sync
+        working-directory: ${{ matrix.module.path }}
+        run: go mod download
 
       - name: Build
         working-directory: ${{ matrix.module.path }}
