@@ -7,6 +7,44 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - path: .
+            name: root
+          - path: server-gateway
+            name: server-gateway
+          - path: services/user
+            name: user-service
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Install dependencies
+        run: go work sync
+
+      - name: go fmt
+        working-directory: ${{ matrix.module.path }}
+        run: |
+          if [ "$(gofmt -s -l . | grep -v 'pkg/protos' | wc -l)" -gt 0 ]; then
+            echo "Code is not formatted properly. Run 'go fmt ./...'"
+            gofmt -s -l . | grep -v 'pkg/protos'
+            exit 1
+          fi
+
+      - name: go vet
+        working-directory: ${{ matrix.module.path }}
+        run: go vet ./...
+
   test:
     name: Test
     runs-on: ubuntu-latest
