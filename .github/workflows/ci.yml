@@ -33,8 +33,8 @@ jobs:
         run: go work sync
 
       - name: go fmt
-        working-directory: ${{ matrix.module.path }}
         run: |
+          cd ${{ matrix.module.path }}
           if [ "$(gofmt -s -l . | grep -v 'pkg/protos' | wc -l)" -gt 0 ]; then
             echo "Code is not formatted properly. Run 'go fmt ./...'"
             gofmt -s -l . | grep -v 'pkg/protos'
@@ -42,8 +42,7 @@ jobs:
           fi
 
       - name: go vet
-        working-directory: ${{ matrix.module.path }}
-        run: go vet ./...
+        run: go vet ./${{ matrix.module.path }}/...
 
   test:
     name: Test
@@ -71,8 +70,7 @@ jobs:
         run: go work sync
 
       - name: Run tests
-        working-directory: ${{ matrix.module.path }}
-        run: go test -v -race -coverprofile=coverage.out ./...
+        run: go test -v -race -coverprofile=${{ matrix.module.path }}/coverage.out ./${{ matrix.module.path }}/...
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -107,5 +105,4 @@ jobs:
         run: go work sync
 
       - name: Build
-        working-directory: ${{ matrix.module.path }}
-        run: go build -v ./...
+        run: go build -v ./${{ matrix.module.path }}/...
