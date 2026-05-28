@@ -1,19 +1,40 @@
-name: linter
-on: [push, pull_request]
+name: golangci-lint
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
 
 jobs:
-  golangci-list:
+  golangci-lint:
+    name: Lint
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - path: .
+            name: root
+          - path: server-gateway
+            name: server-gateway
+          - path: services/user
+            name: user-service
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Go
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: '1.26'
+          cache: true
 
-      - name: run golangci-lint
+      - name: Install dependencies
+        run: go work sync
+
+      - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
-          args: --timeout=5m
+          version: v1.62.0
+          working-directory: ${{ matrix.module.path }}
+          args: --config ${GITHUB_WORKSPACE}/.golangci.yml --timeout=5m

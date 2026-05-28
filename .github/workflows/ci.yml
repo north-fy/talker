@@ -1,16 +1,73 @@
-name: go
-on: [push, pull_request]
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
 
 jobs:
-  build:
+  test:
+    name: Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - path: .
+            name: root
+          - path: server-gateway
+            name: server-gateway
+          - path: services/user
+            name: user-service
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Go
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24'
+          go-version: '1.26'
+          cache: true
 
-      - name: Test
-        run: go fmt # TODO: добавить тесты каждого микросервиса
+      - name: Install dependencies
+        run: go work sync
+
+      - name: Run tests
+        working-directory: ${{ matrix.module.path }}
+        run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ${{ matrix.module.path }}/coverage.out
+          flags: ${{ matrix.module.name }}
+          fail_ci_if_error: false
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+          - path: .
+            name: root
+          - path: server-gateway
+            name: server-gateway
+          - path: services/user
+            name: user-service
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Install dependencies
+        run: go work sync
+
+      - name: Build
+        working-directory: ${{ matrix.module.path }}
+        run: go build -v ./...

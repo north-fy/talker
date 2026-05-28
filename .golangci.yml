@@ -1,6 +1,7 @@
 run:
   timeout: 5m
   tests: false
+  go: '1.26'
 
 linters:
   enable:
@@ -13,13 +14,19 @@ linters:
     - revive
     - gci
     - gofmt
+  disable:
+    - exhaustruct
+    - wrapcheck
+  exclude_paths:
+    - pkg/protos/**/*.pb.go
+    - pkg/protos/**/*_grpc.pb.go
 
 linters-settings:
   gci:
     sections:
       - standard
       - default
-      - prefix(github.com/your-module)
+      - prefix(github.com/north-fy/talker)
     skip-generated: true
   gofmt:
     simplify: true
@@ -60,3 +67,4 @@ linters-settings:
 issues:
   max-issues-per-linter: 50
   fix: false
+  exclude-use-default: false
