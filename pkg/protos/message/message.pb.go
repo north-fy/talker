@@ -122,11 +122,11 @@ func (*Empty) Descriptor() ([]byte, []int) {
 // Отправка сообщения
 type SendMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`            // ID чата
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`           // ID чата
 	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`                        // Текст сообщения
 	Type          MessageType            `protobuf:"varint,3,opt,name=type,proto3,enum=message.v1.MessageType" json:"type,omitempty"` // Тип сообщения (text, image, file)
-	ReplyTo       string                 `protobuf:"bytes,4,opt,name=reply_to,json=replyTo,proto3" json:"reply_to,omitempty"`         // ID сообщения, на которое отвечаем (опционально)
-	Attachments   []string               `protobuf:"bytes,5,rep,name=attachments,proto3" json:"attachments,omitempty"`                // Список ID вложений (из File Service)
+	ReplyTo       int64                  `protobuf:"varint,4,opt,name=reply_to,json=replyTo,proto3" json:"reply_to,omitempty"`        // ID сообщения, на которое отвечаем (опционально)
+	Attachments   []int64                `protobuf:"varint,5,rep,packed,name=attachments,proto3" json:"attachments,omitempty"`        // Список ID вложений (из File Service)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -161,11 +161,11 @@ func (*SendMessageRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SendMessageRequest) GetChatId() string {
+func (x *SendMessageRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *SendMessageRequest) GetContent() string {
@@ -182,14 +182,14 @@ func (x *SendMessageRequest) GetType() MessageType {
 	return MessageType_MESSAGE_TYPE_UNKNOWN
 }
 
-func (x *SendMessageRequest) GetReplyTo() string {
+func (x *SendMessageRequest) GetReplyTo() int64 {
 	if x != nil {
 		return x.ReplyTo
 	}
-	return ""
+	return 0
 }
 
-func (x *SendMessageRequest) GetAttachments() []string {
+func (x *SendMessageRequest) GetAttachments() []int64 {
 	if x != nil {
 		return x.Attachments
 	}
@@ -199,10 +199,10 @@ func (x *SendMessageRequest) GetAttachments() []string {
 // Получение сообщений чата
 type GetMessagesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"` // ID чата
-	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`                // Сколько сообщений (max 100)
-	Before        string                 `protobuf:"bytes,3,opt,name=before,proto3" json:"before,omitempty"`               // Пагинация: ID сообщения, до которого грузить
-	After         string                 `protobuf:"bytes,4,opt,name=after,proto3" json:"after,omitempty"`                 // Пагинация: ID сообщения, после которого грузить
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"` // ID чата
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`                 // Сколько сообщений (max 100)
+	Before        int64                  `protobuf:"varint,3,opt,name=before,proto3" json:"before,omitempty"`               // Пагинация: ID сообщения, до которого грузить
+	After         int64                  `protobuf:"varint,4,opt,name=after,proto3" json:"after,omitempty"`                 // Пагинация: ID сообщения, после которого грузить
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -237,11 +237,11 @@ func (*GetMessagesRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetMessagesRequest) GetChatId() string {
+func (x *GetMessagesRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *GetMessagesRequest) GetLimit() int32 {
@@ -251,18 +251,18 @@ func (x *GetMessagesRequest) GetLimit() int32 {
 	return 0
 }
 
-func (x *GetMessagesRequest) GetBefore() string {
+func (x *GetMessagesRequest) GetBefore() int64 {
 	if x != nil {
 		return x.Before
 	}
-	return ""
+	return 0
 }
 
-func (x *GetMessagesRequest) GetAfter() string {
+func (x *GetMessagesRequest) GetAfter() int64 {
 	if x != nil {
 		return x.After
 	}
-	return ""
+	return 0
 }
 
 type GetMessagesResponse struct {
@@ -328,7 +328,7 @@ func (x *GetMessagesResponse) GetTotalCount() int32 {
 // Редактирование сообщения
 type EditMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"` // Новый текст
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -364,11 +364,11 @@ func (*EditMessageRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *EditMessageRequest) GetMessageId() string {
+func (x *EditMessageRequest) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 func (x *EditMessageRequest) GetContent() string {
@@ -381,7 +381,7 @@ func (x *EditMessageRequest) GetContent() string {
 // Удаление сообщения
 type DeleteMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	ForEveryone   bool                   `protobuf:"varint,2,opt,name=for_everyone,json=forEveryone,proto3" json:"for_everyone,omitempty"` // Удалить у всех (true) или только у себя (false)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -417,11 +417,11 @@ func (*DeleteMessageRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *DeleteMessageRequest) GetMessageId() string {
+func (x *DeleteMessageRequest) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 func (x *DeleteMessageRequest) GetForEveryone() bool {
@@ -434,7 +434,7 @@ func (x *DeleteMessageRequest) GetForEveryone() bool {
 // Получить одно сообщение
 type GetMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -469,17 +469,17 @@ func (*GetMessageRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GetMessageRequest) GetMessageId() string {
+func (x *GetMessageRequest) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 // Реакции
 type AddReactionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	Reaction      string                 `protobuf:"bytes,2,opt,name=reaction,proto3" json:"reaction,omitempty"` // Смайлик: "❤️", "👍", "😂" и т.д.
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -515,11 +515,11 @@ func (*AddReactionRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *AddReactionRequest) GetMessageId() string {
+func (x *AddReactionRequest) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 func (x *AddReactionRequest) GetReaction() string {
@@ -531,7 +531,7 @@ func (x *AddReactionRequest) GetReaction() string {
 
 type RemoveReactionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	Reaction      string                 `protobuf:"bytes,2,opt,name=reaction,proto3" json:"reaction,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -567,11 +567,11 @@ func (*RemoveReactionRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *RemoveReactionRequest) GetMessageId() string {
+func (x *RemoveReactionRequest) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 func (x *RemoveReactionRequest) GetReaction() string {
@@ -583,7 +583,7 @@ func (x *RemoveReactionRequest) GetReaction() string {
 
 type GetReactionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -618,11 +618,11 @@ func (*GetReactionsRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *GetReactionsRequest) GetMessageId() string {
+func (x *GetReactionsRequest) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 type GetReactionsResponse struct {
@@ -673,7 +673,7 @@ type ReactionCount struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Reaction      string                 `protobuf:"bytes,1,opt,name=reaction,proto3" json:"reaction,omitempty"`
 	Count         int32                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
-	UserIds       []string               `protobuf:"bytes,3,rep,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"` // Кто поставил (первые 10)
+	UserIds       []int64                `protobuf:"varint,3,rep,packed,name=user_ids,json=userIds,proto3" json:"user_ids,omitempty"` // Кто поставил (первые 10)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -722,7 +722,7 @@ func (x *ReactionCount) GetCount() int32 {
 	return 0
 }
 
-func (x *ReactionCount) GetUserIds() []string {
+func (x *ReactionCount) GetUserIds() []int64 {
 	if x != nil {
 		return x.UserIds
 	}
@@ -732,10 +732,10 @@ func (x *ReactionCount) GetUserIds() []string {
 // Поиск сообщений
 type SearchMessagesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"` // Опционально: поиск только в конкретном чате
-	Query         string                 `protobuf:"bytes,2,opt,name=query,proto3" json:"query,omitempty"`                 // Поисковый запрос
-	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`                // Максимум результатов (max 50)
-	Before        string                 `protobuf:"bytes,4,opt,name=before,proto3" json:"before,omitempty"`               // Пагинация
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"` // Опционально: поиск только в конкретном чате
+	Query         string                 `protobuf:"bytes,2,opt,name=query,proto3" json:"query,omitempty"`                  // Поисковый запрос
+	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`                 // Максимум результатов (max 50)
+	Before        int64                  `protobuf:"varint,4,opt,name=before,proto3" json:"before,omitempty"`               // Пагинация
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -770,11 +770,11 @@ func (*SearchMessagesRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *SearchMessagesRequest) GetChatId() string {
+func (x *SearchMessagesRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *SearchMessagesRequest) GetQuery() string {
@@ -791,11 +791,11 @@ func (x *SearchMessagesRequest) GetLimit() int32 {
 	return 0
 }
 
-func (x *SearchMessagesRequest) GetBefore() string {
+func (x *SearchMessagesRequest) GetBefore() int64 {
 	if x != nil {
 		return x.Before
 	}
-	return ""
+	return 0
 }
 
 type SearchMessagesResponse struct {
@@ -853,9 +853,9 @@ func (x *SearchMessagesResponse) GetHasMore() bool {
 // Отметить как прочитанное
 type MarkAsReadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                          // Будет из контекста, но оставим для ясности
-	UpToMessageId string                 `protobuf:"bytes,3,opt,name=up_to_message_id,json=upToMessageId,proto3" json:"up_to_message_id,omitempty"` // До какого сообщения прочитано
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                          // Будет из контекста, но оставим для ясности
+	UpToMessageId int64                  `protobuf:"varint,3,opt,name=up_to_message_id,json=upToMessageId,proto3" json:"up_to_message_id,omitempty"` // До какого сообщения прочитано
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -890,32 +890,32 @@ func (*MarkAsReadRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *MarkAsReadRequest) GetChatId() string {
+func (x *MarkAsReadRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *MarkAsReadRequest) GetUserId() string {
+func (x *MarkAsReadRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
-func (x *MarkAsReadRequest) GetUpToMessageId() string {
+func (x *MarkAsReadRequest) GetUpToMessageId() int64 {
 	if x != nil {
 		return x.UpToMessageId
 	}
-	return ""
+	return 0
 }
 
 // Непрочитанные сообщения
 type GetUnreadCountRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -950,24 +950,24 @@ func (*GetUnreadCountRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *GetUnreadCountRequest) GetChatId() string {
+func (x *GetUnreadCountRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *GetUnreadCountRequest) GetUserId() string {
+func (x *GetUnreadCountRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 type GetUnreadCountResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Count         int32                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	LastMessageId string                 `protobuf:"bytes,2,opt,name=last_message_id,json=lastMessageId,proto3" json:"last_message_id,omitempty"` // ID последнего непрочитанного
+	LastMessageId int64                  `protobuf:"varint,2,opt,name=last_message_id,json=lastMessageId,proto3" json:"last_message_id,omitempty"` // ID последнего непрочитанного
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1009,18 +1009,18 @@ func (x *GetUnreadCountResponse) GetCount() int32 {
 	return 0
 }
 
-func (x *GetUnreadCountResponse) GetLastMessageId() string {
+func (x *GetUnreadCountResponse) GetLastMessageId() int64 {
 	if x != nil {
 		return x.LastMessageId
 	}
-	return ""
+	return 0
 }
 
 // WebSocket
 type ConnectWebSocketRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"` // JWT токен для аутентификации
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1056,18 +1056,18 @@ func (*ConnectWebSocketRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *ConnectWebSocketRequest) GetChatId() string {
+func (x *ConnectWebSocketRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *ConnectWebSocketRequest) GetUserId() string {
+func (x *ConnectWebSocketRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *ConnectWebSocketRequest) GetToken() string {
@@ -1242,7 +1242,7 @@ func (*WebSocketMessage_ReadReceipt) isWebSocketMessage_Event() {}
 // Внутренние методы
 type GetLastMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1277,16 +1277,16 @@ func (*GetLastMessageRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{19}
 }
 
-func (x *GetLastMessageRequest) GetChatId() string {
+func (x *GetLastMessageRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 type DeleteChatMessagesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1321,28 +1321,28 @@ func (*DeleteChatMessagesRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{20}
 }
 
-func (x *DeleteChatMessagesRequest) GetChatId() string {
+func (x *DeleteChatMessagesRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 // Сообщение
 type Message struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ChatId        string                 `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	SenderId      string                 `protobuf:"bytes,3,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	SenderId      int64                  `protobuf:"varint,3,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
 	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
 	Type          MessageType            `protobuf:"varint,5,opt,name=type,proto3,enum=message.v1.MessageType" json:"type,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	IsEdited      bool                   `protobuf:"varint,8,opt,name=is_edited,json=isEdited,proto3" json:"is_edited,omitempty"`
 	IsDeleted     bool                   `protobuf:"varint,9,opt,name=is_deleted,json=isDeleted,proto3" json:"is_deleted,omitempty"`
-	ReplyTo       string                 `protobuf:"bytes,10,opt,name=reply_to,json=replyTo,proto3" json:"reply_to,omitempty"`                                                                 // ID сообщения, на которое отвечаем
+	ReplyTo       int64                  `protobuf:"varint,10,opt,name=reply_to,json=replyTo,proto3" json:"reply_to,omitempty"`                                                                // ID сообщения, на которое отвечаем
 	ReplyInfo     *ReplyInfo             `protobuf:"bytes,11,opt,name=reply_info,json=replyInfo,proto3" json:"reply_info,omitempty"`                                                           // Информация о сообщении-ответе
-	Attachments   []string               `protobuf:"bytes,12,rep,name=attachments,proto3" json:"attachments,omitempty"`                                                                        // Список ID вложений
+	Attachments   []int64                `protobuf:"varint,12,rep,packed,name=attachments,proto3" json:"attachments,omitempty"`                                                                // Список ID вложений
 	Reactions     map[string]int32       `protobuf:"bytes,13,rep,name=reactions,proto3" json:"reactions,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` // Счётчики реакций { "❤️": 5, "👍": 2 }
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1378,25 +1378,25 @@ func (*Message) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{21}
 }
 
-func (x *Message) GetId() string {
+func (x *Message) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
-func (x *Message) GetChatId() string {
+func (x *Message) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *Message) GetSenderId() string {
+func (x *Message) GetSenderId() int64 {
 	if x != nil {
 		return x.SenderId
 	}
-	return ""
+	return 0
 }
 
 func (x *Message) GetContent() string {
@@ -1441,11 +1441,11 @@ func (x *Message) GetIsDeleted() bool {
 	return false
 }
 
-func (x *Message) GetReplyTo() string {
+func (x *Message) GetReplyTo() int64 {
 	if x != nil {
 		return x.ReplyTo
 	}
-	return ""
+	return 0
 }
 
 func (x *Message) GetReplyInfo() *ReplyInfo {
@@ -1455,7 +1455,7 @@ func (x *Message) GetReplyInfo() *ReplyInfo {
 	return nil
 }
 
-func (x *Message) GetAttachments() []string {
+func (x *Message) GetAttachments() []int64 {
 	if x != nil {
 		return x.Attachments
 	}
@@ -1472,7 +1472,7 @@ func (x *Message) GetReactions() map[string]int32 {
 // Информация о сообщении-ответе (опционально, подгружается при запросе)
 type ReplyInfo struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	MessageId      string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId      int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	SenderName     string                 `protobuf:"bytes,2,opt,name=sender_name,json=senderName,proto3" json:"sender_name,omitempty"`             // Имя отправителя (из User Service)
 	ContentPreview string                 `protobuf:"bytes,3,opt,name=content_preview,json=contentPreview,proto3" json:"content_preview,omitempty"` // Превью текста (первые 50 символов)
 	unknownFields  protoimpl.UnknownFields
@@ -1509,11 +1509,11 @@ func (*ReplyInfo) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *ReplyInfo) GetMessageId() string {
+func (x *ReplyInfo) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 func (x *ReplyInfo) GetSenderName() string {
@@ -1533,8 +1533,8 @@ func (x *ReplyInfo) GetContentPreview() string {
 // Реакция
 type Reaction struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Reaction      string                 `protobuf:"bytes,3,opt,name=reaction,proto3" json:"reaction,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1571,18 +1571,18 @@ func (*Reaction) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{23}
 }
 
-func (x *Reaction) GetMessageId() string {
+func (x *Reaction) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
-func (x *Reaction) GetUserId() string {
+func (x *Reaction) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *Reaction) GetReaction() string {
@@ -1647,7 +1647,7 @@ func (x *NewMessageEvent) GetMessage() *Message {
 // Обновление сообщения
 type MessageUpdatedEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	NewContent    string                 `protobuf:"bytes,2,opt,name=new_content,json=newContent,proto3" json:"new_content,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1684,11 +1684,11 @@ func (*MessageUpdatedEvent) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{25}
 }
 
-func (x *MessageUpdatedEvent) GetMessageId() string {
+func (x *MessageUpdatedEvent) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 func (x *MessageUpdatedEvent) GetNewContent() string {
@@ -1708,7 +1708,7 @@ func (x *MessageUpdatedEvent) GetUpdatedAt() *timestamppb.Timestamp {
 // Удаление сообщения
 type MessageDeletedEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	ForEveryone   bool                   `protobuf:"varint,2,opt,name=for_everyone,json=forEveryone,proto3" json:"for_everyone,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1744,11 +1744,11 @@ func (*MessageDeletedEvent) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{26}
 }
 
-func (x *MessageDeletedEvent) GetMessageId() string {
+func (x *MessageDeletedEvent) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 func (x *MessageDeletedEvent) GetForEveryone() bool {
@@ -1761,8 +1761,8 @@ func (x *MessageDeletedEvent) GetForEveryone() bool {
 // Добавлена реакция
 type ReactionAddedEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Reaction      string                 `protobuf:"bytes,3,opt,name=reaction,proto3" json:"reaction,omitempty"`
 	NewCount      int32                  `protobuf:"varint,4,opt,name=new_count,json=newCount,proto3" json:"new_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1799,18 +1799,18 @@ func (*ReactionAddedEvent) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{27}
 }
 
-func (x *ReactionAddedEvent) GetMessageId() string {
+func (x *ReactionAddedEvent) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
-func (x *ReactionAddedEvent) GetUserId() string {
+func (x *ReactionAddedEvent) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *ReactionAddedEvent) GetReaction() string {
@@ -1830,8 +1830,8 @@ func (x *ReactionAddedEvent) GetNewCount() int32 {
 // Удалена реакция
 type ReactionRemovedEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MessageId     string                 `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Reaction      string                 `protobuf:"bytes,3,opt,name=reaction,proto3" json:"reaction,omitempty"`
 	NewCount      int32                  `protobuf:"varint,4,opt,name=new_count,json=newCount,proto3" json:"new_count,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1868,18 +1868,18 @@ func (*ReactionRemovedEvent) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *ReactionRemovedEvent) GetMessageId() string {
+func (x *ReactionRemovedEvent) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
-func (x *ReactionRemovedEvent) GetUserId() string {
+func (x *ReactionRemovedEvent) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *ReactionRemovedEvent) GetReaction() string {
@@ -1899,8 +1899,8 @@ func (x *ReactionRemovedEvent) GetNewCount() int32 {
 // Пользователь печатает
 type TypingEvent struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
 	IsTyping      bool                   `protobuf:"varint,4,opt,name=is_typing,json=isTyping,proto3" json:"is_typing,omitempty"` // true - начал печатать, false - перестал
 	unknownFields protoimpl.UnknownFields
@@ -1937,18 +1937,18 @@ func (*TypingEvent) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{29}
 }
 
-func (x *TypingEvent) GetChatId() string {
+func (x *TypingEvent) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *TypingEvent) GetUserId() string {
+func (x *TypingEvent) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *TypingEvent) GetUsername() string {
@@ -1968,8 +1968,8 @@ func (x *TypingEvent) GetIsTyping() bool {
 // Подтверждение прочтения
 type ReadReceiptEvent struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
-	ChatId            string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId            string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId            int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId            int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	ReadUpToMessageId string                 `protobuf:"bytes,3,opt,name=read_up_to_message_id,json=readUpToMessageId,proto3" json:"read_up_to_message_id,omitempty"`
 	ReadAt            *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=read_at,json=readAt,proto3" json:"read_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
@@ -2006,18 +2006,18 @@ func (*ReadReceiptEvent) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{30}
 }
 
-func (x *ReadReceiptEvent) GetChatId() string {
+func (x *ReadReceiptEvent) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *ReadReceiptEvent) GetUserId() string {
+func (x *ReadReceiptEvent) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *ReadReceiptEvent) GetReadUpToMessageId() string {
@@ -2042,16 +2042,16 @@ const file_message_proto_rawDesc = "" +
 	"message.v1\x1a\x0ftimestamp.proto\"\a\n" +
 	"\x05Empty\"\xb1\x01\n" +
 	"\x12SendMessageRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x18\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12+\n" +
 	"\x04type\x18\x03 \x01(\x0e2\x17.message.v1.MessageTypeR\x04type\x12\x19\n" +
-	"\breply_to\x18\x04 \x01(\tR\areplyTo\x12 \n" +
-	"\vattachments\x18\x05 \x03(\tR\vattachments\"q\n" +
+	"\breply_to\x18\x04 \x01(\x03R\areplyTo\x12 \n" +
+	"\vattachments\x18\x05 \x03(\x03R\vattachments\"q\n" +
 	"\x12GetMessagesRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x14\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06before\x18\x03 \x01(\tR\x06before\x12\x14\n" +
-	"\x05after\x18\x04 \x01(\tR\x05after\"\x82\x01\n" +
+	"\x06before\x18\x03 \x01(\x03R\x06before\x12\x14\n" +
+	"\x05after\x18\x04 \x01(\x03R\x05after\"\x82\x01\n" +
 	"\x13GetMessagesResponse\x12/\n" +
 	"\bmessages\x18\x01 \x03(\v2\x13.message.v1.MessageR\bmessages\x12\x19\n" +
 	"\bhas_more\x18\x02 \x01(\bR\ahasMore\x12\x1f\n" +
@@ -2059,26 +2059,26 @@ const file_message_proto_rawDesc = "" +
 	"totalCount\"M\n" +
 	"\x12EditMessageRequest\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x18\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\"X\n" +
 	"\x14DeleteMessageRequest\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12!\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12!\n" +
 	"\ffor_everyone\x18\x02 \x01(\bR\vforEveryone\"2\n" +
 	"\x11GetMessageRequest\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\"O\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\"O\n" +
 	"\x12AddReactionRequest\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x1a\n" +
 	"\breaction\x18\x02 \x01(\tR\breaction\"R\n" +
 	"\x15RemoveReactionRequest\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1a\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x1a\n" +
 	"\breaction\x18\x02 \x01(\tR\breaction\"4\n" +
 	"\x13GetReactionsRequest\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\"\xbe\x01\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\"\xbe\x01\n" +
 	"\x14GetReactionsResponse\x12M\n" +
 	"\treactions\x18\x01 \x03(\v2/.message.v1.GetReactionsResponse.ReactionsEntryR\treactions\x1aW\n" +
 	"\x0eReactionsEntry\x12\x10\n" +
@@ -2087,28 +2087,28 @@ const file_message_proto_rawDesc = "" +
 	"\rReactionCount\x12\x1a\n" +
 	"\breaction\x18\x01 \x01(\tR\breaction\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x19\n" +
-	"\buser_ids\x18\x03 \x03(\tR\auserIds\"t\n" +
+	"\buser_ids\x18\x03 \x03(\x03R\auserIds\"t\n" +
 	"\x15SearchMessagesRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x14\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x14\n" +
 	"\x05query\x18\x02 \x01(\tR\x05query\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06before\x18\x04 \x01(\tR\x06before\"d\n" +
+	"\x06before\x18\x04 \x01(\x03R\x06before\"d\n" +
 	"\x16SearchMessagesResponse\x12/\n" +
 	"\bmessages\x18\x01 \x03(\v2\x13.message.v1.MessageR\bmessages\x12\x19\n" +
 	"\bhas_more\x18\x02 \x01(\bR\ahasMore\"n\n" +
 	"\x11MarkAsReadRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12'\n" +
-	"\x10up_to_message_id\x18\x03 \x01(\tR\rupToMessageId\"I\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12'\n" +
+	"\x10up_to_message_id\x18\x03 \x01(\x03R\rupToMessageId\"I\n" +
 	"\x15GetUnreadCountRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"V\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"V\n" +
 	"\x16GetUnreadCountResponse\x12\x14\n" +
 	"\x05count\x18\x01 \x01(\x05R\x05count\x12&\n" +
-	"\x0flast_message_id\x18\x02 \x01(\tR\rlastMessageId\"a\n" +
+	"\x0flast_message_id\x18\x02 \x01(\x03R\rlastMessageId\"a\n" +
 	"\x17ConnectWebSocketRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x14\n" +
 	"\x05token\x18\x03 \x01(\tR\x05token\"\x81\x04\n" +
 	"\x10WebSocketMessage\x12>\n" +
 	"\vnew_message\x18\x01 \x01(\v2\x1b.message.v1.NewMessageEventH\x00R\n" +
@@ -2121,13 +2121,13 @@ const file_message_proto_rawDesc = "" +
 	"\fread_receipt\x18\a \x01(\v2\x1c.message.v1.ReadReceiptEventH\x00R\vreadReceiptB\a\n" +
 	"\x05event\"0\n" +
 	"\x15GetLastMessageRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\"4\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\"4\n" +
 	"\x19DeleteChatMessagesRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\"\xbb\x04\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\"\xbb\x04\n" +
 	"\aMessage\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
-	"\achat_id\x18\x02 \x01(\tR\x06chatId\x12\x1b\n" +
-	"\tsender_id\x18\x03 \x01(\tR\bsenderId\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\achat_id\x18\x02 \x01(\x03R\x06chatId\x12\x1b\n" +
+	"\tsender_id\x18\x03 \x01(\x03R\bsenderId\x12\x18\n" +
 	"\acontent\x18\x04 \x01(\tR\acontent\x12+\n" +
 	"\x04type\x18\x05 \x01(\x0e2\x17.message.v1.MessageTypeR\x04type\x129\n" +
 	"\n" +
@@ -2138,24 +2138,24 @@ const file_message_proto_rawDesc = "" +
 	"\n" +
 	"is_deleted\x18\t \x01(\bR\tisDeleted\x12\x19\n" +
 	"\breply_to\x18\n" +
-	" \x01(\tR\areplyTo\x124\n" +
+	" \x01(\x03R\areplyTo\x124\n" +
 	"\n" +
 	"reply_info\x18\v \x01(\v2\x15.message.v1.ReplyInfoR\treplyInfo\x12 \n" +
-	"\vattachments\x18\f \x03(\tR\vattachments\x12@\n" +
+	"\vattachments\x18\f \x03(\x03R\vattachments\x12@\n" +
 	"\treactions\x18\r \x03(\v2\".message.v1.Message.ReactionsEntryR\treactions\x1a<\n" +
 	"\x0eReactionsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"t\n" +
 	"\tReplyInfo\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1f\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x1f\n" +
 	"\vsender_name\x18\x02 \x01(\tR\n" +
 	"senderName\x12'\n" +
 	"\x0fcontent_preview\x18\x03 \x01(\tR\x0econtentPreview\"\x99\x01\n" +
 	"\bReaction\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1a\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1a\n" +
 	"\breaction\x18\x03 \x01(\tR\breaction\x129\n" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"@\n" +
@@ -2163,35 +2163,35 @@ const file_message_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\v2\x13.message.v1.MessageR\amessage\"\x90\x01\n" +
 	"\x13MessageUpdatedEvent\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x1f\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x1f\n" +
 	"\vnew_content\x18\x02 \x01(\tR\n" +
 	"newContent\x129\n" +
 	"\n" +
 	"updated_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"W\n" +
 	"\x13MessageDeletedEvent\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12!\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12!\n" +
 	"\ffor_everyone\x18\x02 \x01(\bR\vforEveryone\"\x85\x01\n" +
 	"\x12ReactionAddedEvent\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1a\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1a\n" +
 	"\breaction\x18\x03 \x01(\tR\breaction\x12\x1b\n" +
 	"\tnew_count\x18\x04 \x01(\x05R\bnewCount\"\x87\x01\n" +
 	"\x14ReactionRemovedEvent\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1a\n" +
+	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1a\n" +
 	"\breaction\x18\x03 \x01(\tR\breaction\x12\x1b\n" +
 	"\tnew_count\x18\x04 \x01(\x05R\bnewCount\"x\n" +
 	"\vTypingEvent\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1a\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1a\n" +
 	"\busername\x18\x03 \x01(\tR\busername\x12\x1b\n" +
 	"\tis_typing\x18\x04 \x01(\bR\bisTyping\"\xab\x01\n" +
 	"\x10ReadReceiptEvent\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x120\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x120\n" +
 	"\x15read_up_to_message_id\x18\x03 \x01(\tR\x11readUpToMessageId\x123\n" +
 	"\aread_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x06readAt*\xa0\x01\n" +
 	"\vMessageType\x12\x18\n" +

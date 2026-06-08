@@ -25,7 +25,7 @@ CREATE TABLE messages (
 
 */
 
-func (s *Storage) CreateMessage(ctx context.Context, req dto.SendMessageRequest) (models.Message, error) {
+func (s *Storage) CreateMessage(ctx context.Context,  req dto.SendMessageRequest) (models.Message, error) {
 	query := `
 	INSERT INTO messages(chat_id, )
 

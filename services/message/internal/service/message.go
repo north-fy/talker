@@ -9,7 +9,7 @@ import (
 )
 
 type StorageMessage interface {
-	CreateMessage(ctx context.Context, req dto.SendMessageRequest) (models.Message, error)
+	CreateMessage(ctx context.Context, senderID string, req dto.SendMessageRequest) (models.Message, error)
 	SelectMessages(ctx context.Context, req dto.GetMessagesRequest) ([]*models.Message, error)
 	UpdateMessage(ctx context.Context, req dto.EditMessageRequest) (models.Message, error)
 	DeleteMessage(ctx context.Context, req dto.DeleteMessageRequest) error
@@ -51,7 +51,7 @@ func (s *MessageFuncService) GetMessages(ctx context.Context, req dto.GetMessage
 
 	var (
 		isMore bool
-		count int32
+		count  int32
 	)
 
 	if len(messages) > 1 {
@@ -60,9 +60,9 @@ func (s *MessageFuncService) GetMessages(ctx context.Context, req dto.GetMessage
 	}
 
 	return dto.GetMessagesResponse{
-		Messages: messages,
-		HasMore:   isMore,
-		TotalCount:    count,
+		Messages:   messages,
+		HasMore:    isMore,
+		TotalCount: count,
 	}, nil
 }
 
