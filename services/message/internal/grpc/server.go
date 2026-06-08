@@ -5,6 +5,7 @@ import (
 )
 
 type MessageService interface {
+	MessageFuncService
 }
 
 type serverAPI struct {

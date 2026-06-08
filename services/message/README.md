@@ -58,3 +58,10 @@ CREATE TABLE read_receipts (
     updated_at TIMESTAMP DEFAULT NOW(),
     PRIMARY KEY (chat_id, user_id)
 );
+```
+# TODO 
+1) message handlers + service + repo
+2) reaction
+3) feature
+4) docker
+5) 
