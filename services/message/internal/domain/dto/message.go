@@ -19,18 +19,18 @@ const (
 )
 
 type SendMessageRequest struct {
-	ChatID      string
+	ChatID      int64
 	Content     string
 	MessageType MessageType
-	ReplyTo     string
+	ReplyTo     int64
 	Attachments []string
 }
 
 type GetMessagesRequest struct {
-	ChatID string
+	ChatID int64
 	Limit  int32
-	Before string
-	After  string
+	Before int64
+	After  int64
 }
 
 type GetMessagesResponse struct {
@@ -40,36 +40,36 @@ type GetMessagesResponse struct {
 }
 
 type EditMessageRequest struct {
-	MessageID string
+	MessageID int64
 	Content   string
 }
 
 type DeleteMessageRequest struct {
-	MessageID    string
+	MessageID    int64
 	ForEveryone  bool
 }
 
 type GetMessageRequest struct {
-	MessageID string
+	MessageID int64
 }
 
 type AddReactionRequest struct {
-	MessageID string
+	MessageID int64
 	Reaction  string
-	UserID    string
+	UserID    int64
 }
 
 type RemoveReactionRequest struct {
-	MessageID string
+	MessageID int64
 	Reaction  string
-	UserID    string
+	UserID    int64
 }
 
 type SearchMessagesRequest struct {
-	ChatID string
+	ChatID int64
 	Query  string
 	Limit  int32
-	Before string
+	Before int64
 }
 
 type SearchMessagesResponse struct {
@@ -78,38 +78,38 @@ type SearchMessagesResponse struct {
 }
 
 type MarkAsReadRequest struct {
-	ChatID        string
-	UserID        string
-	UpToMessageID string
+	ChatID        int64
+	UserID        int64
+	UpToMessageID int64
 }
 
 type GetUnreadCountRequest struct {
-	ChatID string
-	UserID string
+	ChatID int64
+	UserID int64
 }
 
 type GetUnreadCountResponse struct {
 	Count          int32
-	LastMessageID  string
+	LastMessageID  int64
 }
 
 type ConnectWebSocketRequest struct {
-	ChatID string
-	UserID string
+	ChatID int64
+	UserID int64
 	Token  string
 }
 
 type GetLastMessageRequest struct {
-	ChatID string
+	ChatID int64
 }
 
 type DeleteChatMessagesRequest struct {
-	ChatID string
+	ChatID int64
 }
 
 type Reaction struct {
-	MessageID  string
-	UserID     string
+	MessageID  int64
+	UserID     int64
 	Reaction   string
 	CreatedAt  time.Time
 }
@@ -130,7 +130,7 @@ func (e *NewMessageEvent) EventType() string {
 
 // MessageUpdatedEvent represents a message updated WebSocket event
 type MessageUpdatedEvent struct {
-	MessageID  string
+	MessageID  int64
 	NewContent string
 	UpdatedAt  time.Time
 }
@@ -141,7 +141,7 @@ func (e *MessageUpdatedEvent) EventType() string {
 
 // MessageDeletedEvent represents a message deleted WebSocket event
 type MessageDeletedEvent struct {
-	MessageID   string
+	MessageID   int64
 	ForEveryone bool
 }
 
@@ -151,8 +151,8 @@ func (e *MessageDeletedEvent) EventType() string {
 
 // ReactionAddedEvent represents a reaction added WebSocket event
 type ReactionAddedEvent struct {
-	MessageID string
-	UserID    string
+	MessageID int64
+	UserID    int64
 	Reaction  string
 	NewCount  int32
 }
@@ -163,8 +163,8 @@ func (e *ReactionAddedEvent) EventType() string {
 
 // ReactionRemovedEvent represents a reaction removed WebSocket event
 type ReactionRemovedEvent struct {
-	MessageID string
-	UserID    string
+	MessageID int64
+	UserID    int64
 	Reaction  string
 	NewCount  int32
 }
@@ -175,8 +175,8 @@ func (e *ReactionRemovedEvent) EventType() string {
 
 // TypingEvent represents a typing WebSocket event
 type TypingEvent struct {
-	ChatID   string
-	UserID   string
+	ChatID   int64
+	UserID   int64
 	Username string
 	IsTyping bool
 }
@@ -187,9 +187,9 @@ func (e *TypingEvent) EventType() string {
 
 // ReadReceiptEvent represents a read receipt WebSocket event
 type ReadReceiptEvent struct {
-	ChatID             string
-	UserID             string
-	ReadUpToMessageID  string
+	ChatID             int64
+	UserID             int64
+	ReadUpToMessageID  int64
 	ReadAt             time.Time
 }
 

@@ -2,6 +2,9 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"time"
 
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
@@ -25,9 +28,136 @@ CREATE TABLE messages (
 
 */
 
-func (s *Storage) CreateMessage(ctx context.Context,  req dto.SendMessageRequest) (models.Message, error) {
+func (s *Storage) CreateMessage(ctx context.Context, senderID int64, req dto.SendMessageRequest) (models.Message, error) {
+	// TODO: add type conversion
 	query := `
-	INSERT INTO messages(chat_id, )
-
+	INSERT INTO messages(chat_id, sender_id, content, reply_to, attachments)
+	VALUES ($1, $2, $3, $4, $5)
+	RETURNING id, type, reactions, is_edited, is_deleted, created_at
 	`
+
+	msg := models.Message{
+		ChatID:      req.ChatID,
+		SenderID:    senderID,
+		Content:     req.Content,
+		ReplyTo:     req.ReplyTo,
+		Attachments: req.Attachments,
+		// UpdatedAt в данном случаем мы берем как sql.NullTime.
+		// Мы не можем записать nil значение в тип time.Time
+		UpdatedAt: sql.NullTime{}.Time,
+	}
+
+	row := s.conn.QueryRow(ctx, query, req.ChatID, senderID, req.Content, req.ReplyTo, req.Attachments)
+	if err := row.Scan(&msg.ID, &msg.MessageType, &msg.Reactions, &msg.IsEdited, &msg.IsDeleted, &msg.CreatedAt); err != nil {
+		return models.Message{}, err
+	}
+
+	return msg, nil
+}
+
+func (s *Storage) SelectMessages(ctx context.Context, req dto.GetMessagesRequest) ([]*models.Message, error) {
+	query := `
+	SELECT id, chat_id, sender_id, content, type, reply_to, attachments, reactions, 
+	       is_edited, is_deleted, created_at, updated_at FROM messages
+	WHERE chat_id = $1 AND id > $2 AND id < $3
+	LIMIT $4
+	`
+
+	rows, err := s.conn.Query(ctx, query, req.ChatID, req.After, req.Before, req.Limit)
+	if err != nil {
+		return nil, err
+	}
+
+	messages := make([]*models.Message, 0, req.Limit)
+	for rows.Next() {
+		msg := models.Message{}
+		if err := rows.Scan(&msg.ID, &msg.ChatID, &msg.SenderID, &msg.Content, &msg.MessageType, &msg.ReplyTo,
+			&msg.Attachments, &msg.Reactions, &msg.IsEdited, &msg.IsDeleted, &msg.CreatedAt,
+			&msg.UpdatedAt); err != nil {
+			return nil, err
+		}
+
+		messages = append(messages, &msg)
+	}
+
+	return messages, nil
+}
+
+func (s *Storage) UpdateMessage(ctx context.Context, req dto.EditMessageRequest) (models.Message, error) {
+	query := `
+	UPDATE messages
+	SET content=$1, 
+	    is_edited=true, 
+	    updated_at=$2
+	WHERE id=$3
+	RETURNING id, chat_id, sender_id, content, type, reply_to, attachments, reactions, 
+	          is_edited, is_deleted, created_at, updated_at
+	`
+
+	row := s.conn.QueryRow(ctx, query, req.Content, time.Now(), req.MessageID)
+
+	var msg models.Message
+	if err := row.Scan(&msg.ID, &msg.ChatID, &msg.SenderID, &msg.Content,
+		&msg.MessageType, &msg.ReplyTo, &msg.Attachments, &msg.Reactions,
+		&msg.IsEdited, &msg.IsDeleted, &msg.CreatedAt, &msg.UpdatedAt); err != nil {
+		return models.Message{}, err
+	}
+
+	return msg, nil
+}
+
+func (s *Storage) DeleteMessageForUser(ctx context.Context, id int64) error {
+	query := `
+	UPDATE messages
+	SET is_deleted = true
+	WHERE id = $1
+	`
+
+	ct, err := s.conn.Exec(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	if ct.RowsAffected() == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
+func (s *Storage) DeleteMessage(ctx context.Context, id int64) error {
+	query := `
+	DELETE FROM messages
+	WHERE id = $1
+	`
+
+	ct, err := s.conn.Exec(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	if ct.RowsAffected() == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
+func (s *Storage) SelectMessage(ctx context.Context, id int64) (models.Message, error) {
+	query := `
+	SELECT id, chat_id, sender_id, content, type, reply_to, attachments, reactions, 
+	       is_edited, is_deleted, created_at, updated_at FROM messages
+	WHERE id = $1
+	`
+
+	row := s.conn.QueryRow(ctx, query, id)
+
+	var msg models.Message
+	if err := row.Scan(&msg.ID, &msg.ChatID, &msg.SenderID, &msg.Content,
+		&msg.MessageType, &msg.ReplyTo, &msg.Attachments, &msg.Reactions,
+		&msg.IsEdited, &msg.IsDeleted, &msg.CreatedAt, &msg.UpdatedAt); err != nil {
+		return models.Message{}, err
+	}
+
+	return msg, nil
 }

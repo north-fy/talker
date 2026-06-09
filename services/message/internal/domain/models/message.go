@@ -3,23 +3,23 @@ package models
 import "time"
 
 type Message struct {
-	ID           string
-	ChatID       string
-	SenderID     string
+	ID           int64
+	ChatID       int64
+	SenderID     int64
 	Content      string
 	MessageType  string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	IsEdited     bool
 	IsDeleted    bool
-	ReplyTo      string
+	ReplyTo      int64
 	ReplyInfoMsg ReplyInfo
 	Attachments  []string
 	Reactions    map[string]int32
 }
 
 type ReplyInfo struct {
-	MessageID      string
+	MessageID      int64
 	SenderName     string
 	ContentPreview string
 }
