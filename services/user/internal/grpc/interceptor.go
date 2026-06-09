@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/north-fy/talker/services/user/internal/domain/models"
 	"github.com/north-fy/talker/services/user/pkg/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -40,6 +41,6 @@ var AuthFunc = func(ctx context.Context) (context.Context, error) {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token: %v", err)
 	}
 
-	ctx = context.WithValue(ctx, "token", token)
+	ctx = context.WithValue(ctx, models.Token, token)
 	return ctx, nil
 }

@@ -77,7 +77,7 @@ func (s *Service) Login(ctx context.Context, user models.UserLogin) (models.Sess
 		return models.Session{}, err
 	}
 
-	ctx = context.WithValue(ctx, "token", token)
+	ctx = context.WithValue(ctx, models.Token, token)
 
 	return models.Session{
 		UID:   userResp.UID,
@@ -88,7 +88,7 @@ func (s *Service) Login(ctx context.Context, user models.UserLogin) (models.Sess
 func (s *Service) GetMe(ctx context.Context, token string) (models.User, error) {
 	s.log = s.log.With(zap.String("token", token))
 
-	userToken, ok := ctx.Value("token").(string)
+	userToken, ok := ctx.Value(models.Token).(string)
 	if !ok {
 		s.log.Error("user not authenticated")
 		return models.User{}, fmt.Errorf("user not authenticated")
@@ -114,7 +114,7 @@ func (s *Service) GetMe(ctx context.Context, token string) (models.User, error) 
 func (s *Service) ValidateToken(ctx context.Context, token string) (bool, error) {
 	s.log = s.log.With(zap.String("token", token))
 
-	userToken, ok := ctx.Value("token").(string)
+	userToken, ok := ctx.Value(models.Token).(string)
 	if !ok {
 		s.log.Error("user not authenticated")
 		return false, fmt.Errorf("user not authenticated")
