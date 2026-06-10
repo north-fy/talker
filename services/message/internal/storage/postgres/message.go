@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 
 	"github.com/north-fy/talker/services/message/internal/domain/dto"

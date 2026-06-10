@@ -11,4 +11,5 @@ type MessageService interface {
 type serverAPI struct {
 	messagev1.UnimplementedMessageServiceServer
 	msg MessageService
+	react ReactionService
 }
