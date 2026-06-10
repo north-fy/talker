@@ -30,7 +30,7 @@ CREATE TABLE messages (
 func (s *Storage) CreateMessage(ctx context.Context, senderID int64, req dto.SendMessageRequest) (models.Message, error) {
 	// TODO: add type conversion
 	query := `
-	INSERT INTO messages(chat_id, sender_id, content, reply_to, attachments)
+	INSERT INTO messages(chat_id, sender_id, content, reply_to, attachments, reactions)
 	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id, type, reactions, is_edited, is_deleted, created_at
 	`
@@ -46,7 +46,9 @@ func (s *Storage) CreateMessage(ctx context.Context, senderID int64, req dto.Sen
 		UpdatedAt: sql.NullTime{}.Time,
 	}
 
-	row := s.conn.QueryRow(ctx, query, req.ChatID, senderID, req.Content, req.ReplyTo, req.Attachments)
+	reactions := map[string]int32{}
+
+	row := s.conn.QueryRow(ctx, query, req.ChatID, senderID, req.Content, req.ReplyTo, req.Attachments, reactions)
 	if err := row.Scan(&msg.ID, &msg.MessageType, &msg.Reactions, &msg.IsEdited, &msg.IsDeleted, &msg.CreatedAt); err != nil {
 		return models.Message{}, err
 	}
