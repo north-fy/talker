@@ -13,8 +13,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-const workers = 5
-
 type MessageFuncService interface {
 	SendMessage(ctx context.Context, req dto.SendMessageRequest) (models.Message, error)
 	GetMessages(ctx context.Context, req dto.GetMessagesRequest) (dto.GetMessagesResponse, error)
@@ -34,7 +32,7 @@ func (s *serverAPI) SendMessage(ctx context.Context, req *messagev1.SendMessageR
 		Attachments: req.GetAttachments(),
 	}
 
-	message, err := s.msg.SendMessage(ctx, msgReq)
+	message, err := s.serv.SendMessage(ctx, msgReq)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "invalid argument")
 	}
@@ -81,7 +79,7 @@ func (s *serverAPI) GetMessages(ctx context.Context, req *messagev1.GetMessagesR
 		After:  req.GetAfter(),
 	}
 
-	msgResp, err := s.msg.GetMessages(ctx, msgReq)
+	msgResp, err := s.serv.GetMessages(ctx, msgReq)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal error")
 	}
@@ -101,7 +99,7 @@ func (s *serverAPI) EditMessage(ctx context.Context, req *messagev1.EditMessageR
 		Content:   req.GetContent(),
 	}
 
-	msg, err := s.msg.EditMessage(ctx, msgReq)
+	msg, err := s.serv.EditMessage(ctx, msgReq)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal error")
 	}
@@ -115,7 +113,7 @@ func (s *serverAPI) DeleteMessage(ctx context.Context, req *messagev1.DeleteMess
 		ForEveryone: req.GetForEveryone(),
 	}
 
-	isDeleted, err := s.msg.DeleteMessage(ctx, msgReq)
+	isDeleted, err := s.serv.DeleteMessage(ctx, msgReq)
 	if err != nil || !isDeleted {
 		return nil, status.Error(codes.Internal, "internal error")
 	}
@@ -128,7 +126,7 @@ func (s *serverAPI) GetMessage(ctx context.Context, req *messagev1.GetMessageReq
 		MessageID: req.GetMessageId(),
 	}
 
-	msg, err := s.msg.GetMessage(ctx, msgReq)
+	msg, err := s.serv.GetMessage(ctx, msgReq)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "internal error")
 	}

@@ -6,10 +6,12 @@ import (
 
 type MessageService interface {
 	MessageFuncService
+	ReactionService
+	FeatureService
 }
 
 type serverAPI struct {
 	messagev1.UnimplementedMessageServiceServer
-	msg MessageService
-	react ReactionService
+	serv MessageService
+	ws serverWebSocket
 }

@@ -31,3 +31,8 @@ func NewStorage(ctx context.Context, cfg config.PostgresCfg) *Storage {
 	return &Storage{conn: conn}
 }
 
+func (s *Storage) Close() {
+	s.conn.Close()
+	return
+}
+

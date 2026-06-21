@@ -1,0 +1,106 @@
+package service
+
+import (
+	"context"
+
+	"github.com/north-fy/talker/services/message/internal/domain/dto"
+	"github.com/north-fy/talker/services/message/internal/domain/models"
+	"go.uber.org/zap"
+)
+
+/*
+type FeatureService interface {
+	SearchMessages(ctx context.Context, req dto.SearchMessagesRequest) (dto.SearchMessagesResponse, error)
+	MarkAsRead(ctx context.Context, req dto.MarkAsReadRequest) error
+	GetUnreadCount(ctx context.Context, req dto.GetUnreadCountRequest) (dto.GetUnreadCountResponse, error)
+	ConnectWebSocket(ctx context.Context, req dto.ConnectWebSocketRequest) error
+	GetLastMessage(ctx context.Context, req dto.GetLastMessageRequest) (models.Message, error)
+	DeleteChatMessages(ctx context.Context, req dto.DeleteChatMessagesRequest) error
+}
+*/
+
+type StorageFeature interface {
+	SearchMessages(ctx context.Context, req dto.SearchMessagesRequest) ([]*models.Message, error) // Реализация не нужна? тогда dto надо исправлять
+	SetAsRead(ctx context.Context, req dto.MarkAsReadRequest) error
+	SelectUnreadCount(ctx context.Context, req dto.GetUnreadCountRequest) (dto.GetUnreadCountResponse, error)
+	SelectLastMessage(ctx context.Context, req dto.GetLastMessageRequest) (models.Message, error)
+	DeleteChatMessages(ctx context.Context, req dto.DeleteChatMessagesRequest) error
+}
+
+type FeatureService struct {
+	log     *zap.Logger
+	storage StorageFeature
+}
+
+func CreateFeatureService(log *zap.Logger, storage StorageFeature) *FeatureService {
+	return &FeatureService{
+		log:     log,
+		storage: storage,
+	}
+}
+
+func (s *FeatureService) SearchMessage(ctx context.Context, req dto.SearchMessagesRequest) (dto.SearchMessagesResponse, error) {
+	s.log = s.log.With(zap.Any("request", req))
+
+	messages, err := s.storage.SearchMessages(ctx, req)
+	if err != nil {
+		s.log.Error("failed to search messages", zap.Error(err))
+		return dto.SearchMessagesResponse{}, err
+	}
+
+	resp := dto.SearchMessagesResponse{
+		Messages: messages,
+	}
+
+	if len(messages) > 0 {
+		resp.HasMore = true
+	}
+
+	return resp, nil
+}
+
+func (s *FeatureService) MarkAsRead(ctx context.Context, req dto.MarkAsReadRequest) error {
+	s.log = s.log.With(zap.Any("request", req))
+
+	if err := s.storage.SetAsRead(ctx, req); err != nil {
+		s.log.Error("failed to mark messages as read", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (s *FeatureService) GetUnreadCount(ctx context.Context, req dto.GetUnreadCountRequest) (dto.GetUnreadCountResponse, error) {
+	s.log = s.log.With(zap.Any("request", req))
+
+	resp, err := s.storage.SelectUnreadCount(ctx, req)
+	if err != nil {
+		s.log.Error("failed to get unread count", zap.Error(err))
+		return dto.GetUnreadCountResponse{}, err
+	}
+
+	return resp, err
+}
+
+func (s *FeatureService) GetLastMessage(ctx context.Context, req dto.GetLastMessageRequest) (models.Message, error) {
+	s.log = s.log.With(zap.Any("request", req))
+
+	resp, err := s.storage.SelectLastMessage(ctx, req)
+	if err != nil {
+		s.log.Error("failed to select last message", zap.Error(err))
+		return models.Message{}, err
+	}
+
+	return resp, err
+}
+
+func (s *FeatureService) DeleteChatMessages(ctx context.Context, req dto.DeleteChatMessagesRequest) error {
+	s.log = s.log.With(zap.Any("request", req))
+
+	if err := s.storage.DeleteChatMessages(ctx, req); err != nil {
+		s.log.Error("failed to delete chat messages", zap.Error(err))
+		return err
+	}
+
+	return nil
+}

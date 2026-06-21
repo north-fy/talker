@@ -60,8 +60,5 @@ CREATE TABLE read_receipts (
 );
 ```
 # TODO 
-1) message handlers + service + repo
-2) reaction
-3) feature
-4) docker
-5) 
+1) Реализовать event-bus для редиски в остальные сервисы
+2) 

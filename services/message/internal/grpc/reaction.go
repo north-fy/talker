@@ -21,7 +21,7 @@ func (s *serverAPI) AddReaction(ctx context.Context, req *messagev1.AddReactionR
 		Reaction:  req.GetReaction(),
 	}
 
-	reaction, err := s.react.AddReaction(ctx, rectReg)
+	reaction, err := s.serv.AddReaction(ctx, rectReg)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "invalid argument")
 	}
@@ -40,7 +40,7 @@ func (s *serverAPI) RemoveReaction(ctx context.Context, req *messagev1.RemoveRea
 		Reaction:  req.GetReaction(),
 	}
 
-	if err := s.react.RemoveReaction(ctx, rectReg); err != nil {
+	if err := s.serv.RemoveReaction(ctx, rectReg); err != nil {
 		return nil, status.Error(codes.Internal, "invalid argument")
 	}
 

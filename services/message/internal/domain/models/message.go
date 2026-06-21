@@ -14,7 +14,7 @@ type Message struct {
 	IsDeleted    bool
 	ReplyTo      int64
 	ReplyInfoMsg ReplyInfo
-	Attachments  []string
+	Attachments  []int64
 	Reactions    map[string]int32
 }
 
