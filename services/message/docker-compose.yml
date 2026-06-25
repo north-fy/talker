@@ -1,0 +1,87 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: message-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - message-network
+
+  migrate:
+    image: migrate/migrate:latest
+    container_name: message-migrate
+    command: -path=/migrations -database="postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" up
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - message-network
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: message-redis
+    command: redis-server --requirepass redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - message-network
+
+  message-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: message-service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      GRPC_PORT: 50052
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_USER: redis
+      REDIS_PASSWORD: redis
+      REDIS_READ_TIMEOUT: 30s
+      REDIS_WRITE_TIMEOUT: 30s
+      REDIS_DB: 0
+
+    ports:
+      - "50052:50052"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    networks:
+      - message-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  message-network:
+    driver: bridge
