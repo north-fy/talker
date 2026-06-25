@@ -2,6 +2,7 @@ package grpc
 
 import (
 	messagev1 "github.com/north-fy/talker/pkg/protos/message"
+	"google.golang.org/grpc"
 )
 
 type MessageService interface {
@@ -13,5 +14,9 @@ type MessageService interface {
 type serverAPI struct {
 	messagev1.UnimplementedMessageServiceServer
 	serv MessageService
-	ws serverWebSocket
+	ws   ServerWebSocket
+}
+
+func Register(gRPC *grpc.Server, service MessageService, ws ServerWebSocket) {
+	messagev1.RegisterMessageServiceServer(gRPC, &serverAPI{serv: service, ws: ws})
 }

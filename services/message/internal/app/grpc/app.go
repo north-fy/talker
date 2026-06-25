@@ -6,7 +6,7 @@ import (
 	"net"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
-	grpc2 "github.com/north-fy/talker/services/user/internal/grpc"
+	grpc2 "github.com/north-fy/talker/services/message/internal/grpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
@@ -17,14 +17,14 @@ type App struct {
 	port       int
 }
 
-func New(log *zap.Logger, serv grpc2.UserService, port int) *App {
+func New(log *zap.Logger, serv grpc2.MessageService, ws grpc2.ServerWebSocket, port int) *App {
 	adapter := InterceptorLogger(log)
 
 	gRPCServer := grpc.NewServer(grpc.ChainUnaryInterceptor(
 		logging.UnaryServerInterceptor(adapter),
 	))
 
-	grpc2.Register(gRPCServer, serv)
+	grpc2.Register(gRPCServer, serv, ws)
 
 	return &App{
 		log:        log,

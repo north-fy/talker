@@ -2,10 +2,15 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 
+	messagev1 "github.com/north-fy/talker/pkg/protos/message"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
+	"github.com/north-fy/talker/services/message/internal/domain/event"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
+	"github.com/north-fy/talker/services/message/pkg/utils"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type StorageMessage interface {
@@ -18,14 +23,16 @@ type StorageMessage interface {
 }
 
 type MessageFuncService struct {
-	log     *zap.Logger
-	storage StorageMessage
+	log      *zap.Logger
+	storage  StorageMessage
+	eventbus event.EventBus
 }
 
-func NewMessageFuncService(log *zap.Logger, storage StorageMessage) *MessageFuncService {
+func NewMessageFuncService(log *zap.Logger, storage StorageMessage, ev event.EventBus) *MessageFuncService {
 	return &MessageFuncService{
-		log:     log,
-		storage: storage,
+		log:      log,
+		storage:  storage,
+		eventbus: ev,
 	}
 }
 
@@ -38,6 +45,32 @@ func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessag
 	if err != nil {
 		s.log.Error("failed to create message", zap.Error(err))
 		return models.Message{}, err
+	}
+
+	wsData := messagev1.WebSocketMessage{
+		Event: &messagev1.WebSocketMessage_NewMessage{
+			NewMessage: &messagev1.NewMessageEvent{
+				Message: utils.ConvertToProtoMessage(&msg),
+			},
+		},
+	}
+	eventData, err := json.Marshal(&wsData)
+	if err != nil {
+		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		return msg, err
+	}
+
+	ev := event.MessageEvent{
+		Type:    event.WebSocketMessage_NewMessage,
+		ChatID:  req.ChatID,
+		Payload: eventData,
+	}
+
+	if err := s.eventbus.Publish(ctx, &ev); err != nil {
+		s.log.Error("failed to publish msg for stream",
+			zap.Int64("chat_id", ev.GetChatID()),
+			zap.Error(err))
+		return msg, err
 	}
 
 	return msg, nil
@@ -82,6 +115,34 @@ func (s *MessageFuncService) EditMessage(ctx context.Context, req dto.EditMessag
 		return models.Message{}, err
 	}
 
+	wsData := messagev1.WebSocketMessage{
+		Event: &messagev1.WebSocketMessage_MessageUpdated{
+			MessageUpdated: &messagev1.MessageUpdatedEvent{
+				MessageId:  msg.ID,
+				NewContent: msg.Content,
+				UpdatedAt:  timestamppb.New(msg.UpdatedAt),
+			},
+		},
+	}
+	eventData, err := json.Marshal(&wsData)
+	if err != nil {
+		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		return msg, err
+	}
+
+	ev := event.MessageEvent{
+		Type:    event.WebSocketMessage_MessageUpdated,
+		ChatID:  msg.ChatID,
+		Payload: eventData,
+	}
+
+	if err := s.eventbus.Publish(ctx, &ev); err != nil {
+		s.log.Error("failed to publish msg for stream",
+			zap.Int64("chat_id", ev.GetChatID()),
+			zap.Error(err))
+		return msg, err
+	}
+
 	return msg, nil
 }
 
@@ -103,6 +164,33 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 
 	if err != nil {
 		s.log.Error("failed to delete message", zap.Error(err))
+		return false, err
+	}
+
+	wsData := messagev1.WebSocketMessage{
+		Event: &messagev1.WebSocketMessage_MessageDeleted{
+			MessageDeleted: &messagev1.MessageDeletedEvent{
+				MessageId:   req.MessageID,
+				ForEveryone: req.ForEveryone,
+			},
+		},
+	}
+	eventData, err := json.Marshal(&wsData)
+	if err != nil {
+		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		return true, err
+	}
+
+	ev := event.MessageEvent{
+		Type:    event.WebSocketMessage_MessageDeleted,
+		ChatID:  req.ChatID,
+		Payload: eventData,
+	}
+
+	if err := s.eventbus.Publish(ctx, &ev); err != nil {
+		s.log.Error("failed to publish msg for stream",
+			zap.Int64("chat_id", ev.GetChatID()),
+			zap.Error(err))
 		return false, err
 	}
 

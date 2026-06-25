@@ -89,6 +89,7 @@ message EditMessageRequest {
 message DeleteMessageRequest {
   int64 message_id = 1;
   bool for_everyone = 2;           // Удалить у всех (true) или только у себя (false)
+  int64 chat_id = 3;
 }
 
 // Получить одно сообщение

@@ -383,6 +383,7 @@ type DeleteMessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MessageId     int64                  `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	ForEveryone   bool                   `protobuf:"varint,2,opt,name=for_everyone,json=forEveryone,proto3" json:"for_everyone,omitempty"` // Удалить у всех (true) или только у себя (false)
+	ChatId        int64                  `protobuf:"varint,3,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -429,6 +430,13 @@ func (x *DeleteMessageRequest) GetForEveryone() bool {
 		return x.ForEveryone
 	}
 	return false
+}
+
+func (x *DeleteMessageRequest) GetChatId() int64 {
+	if x != nil {
+		return x.ChatId
+	}
+	return 0
 }
 
 // Получить одно сообщение
@@ -2060,11 +2068,12 @@ const file_message_proto_rawDesc = "" +
 	"\x12EditMessageRequest\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\x03R\tmessageId\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\"X\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\"q\n" +
 	"\x14DeleteMessageRequest\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\x03R\tmessageId\x12!\n" +
-	"\ffor_everyone\x18\x02 \x01(\bR\vforEveryone\"2\n" +
+	"\ffor_everyone\x18\x02 \x01(\bR\vforEveryone\x12\x17\n" +
+	"\achat_id\x18\x03 \x01(\x03R\x06chatId\"2\n" +
 	"\x11GetMessageRequest\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\x03R\tmessageId\"O\n" +

@@ -45,8 +45,9 @@ type EditMessageRequest struct {
 }
 
 type DeleteMessageRequest struct {
-	MessageID    int64
-	ForEveryone  bool
+	MessageID   int64
+	ForEveryone bool
+	ChatID      int64
 }
 
 type GetMessageRequest struct {

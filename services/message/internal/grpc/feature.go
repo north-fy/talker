@@ -15,7 +15,7 @@ type FeatureService interface {
 	SearchMessages(ctx context.Context, req dto.SearchMessagesRequest) (dto.SearchMessagesResponse, error)
 	MarkAsRead(ctx context.Context, req dto.MarkAsReadRequest) error
 	GetUnreadCount(ctx context.Context, req dto.GetUnreadCountRequest) (dto.GetUnreadCountResponse, error)
-	ConnectWebSocket(ctx context.Context, req dto.ConnectWebSocketRequest) error
+	//ConnectWebSocket(ctx context.Context, req dto.ConnectWebSocketRequest) error
 	GetLastMessage(ctx context.Context, req dto.GetLastMessageRequest) (models.Message, error)
 	DeleteChatMessages(ctx context.Context, req dto.DeleteChatMessagesRequest) error
 }

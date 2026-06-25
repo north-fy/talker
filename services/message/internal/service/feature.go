@@ -2,10 +2,16 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"strconv"
+	"time"
 
+	messagev1 "github.com/north-fy/talker/pkg/protos/message"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
+	"github.com/north-fy/talker/services/message/internal/domain/event"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 /*
@@ -28,18 +34,19 @@ type StorageFeature interface {
 }
 
 type FeatureService struct {
-	log     *zap.Logger
-	storage StorageFeature
+	log      *zap.Logger
+	storage  StorageFeature
+	eventbus event.EventBus
 }
 
-func CreateFeatureService(log *zap.Logger, storage StorageFeature) *FeatureService {
+func NewFeatureService(log *zap.Logger, storage StorageFeature) *FeatureService {
 	return &FeatureService{
 		log:     log,
 		storage: storage,
 	}
 }
 
-func (s *FeatureService) SearchMessage(ctx context.Context, req dto.SearchMessagesRequest) (dto.SearchMessagesResponse, error) {
+func (s *FeatureService) SearchMessages(ctx context.Context, req dto.SearchMessagesRequest) (dto.SearchMessagesResponse, error) {
 	s.log = s.log.With(zap.Any("request", req))
 
 	messages, err := s.storage.SearchMessages(ctx, req)
@@ -64,6 +71,36 @@ func (s *FeatureService) MarkAsRead(ctx context.Context, req dto.MarkAsReadReque
 
 	if err := s.storage.SetAsRead(ctx, req); err != nil {
 		s.log.Error("failed to mark messages as read", zap.Error(err))
+		return err
+	}
+
+	wsData := messagev1.WebSocketMessage{
+		Event: &messagev1.WebSocketMessage_ReadReceipt{
+			ReadReceipt: &messagev1.ReadReceiptEvent{
+				ChatId:            req.ChatID,
+				UserId:            req.UserID,
+				ReadUpToMessageId: strconv.Itoa(int(req.UpToMessageID)),
+				ReadAt:            timestamppb.New(time.Now()),
+			},
+		},
+	}
+
+	eventData, err := json.Marshal(&wsData)
+	if err != nil {
+		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		return err
+	}
+
+	ev := event.MessageEvent{
+		Type:    event.WebSocketMessage_ReadReceipt,
+		ChatID:  req.ChatID,
+		Payload: eventData,
+	}
+
+	if err = s.eventbus.Publish(ctx, &ev); err != nil {
+		s.log.Error("failed to publish msg for stream",
+			zap.Int64("chat_id", ev.GetChatID()),
+			zap.Error(err))
 		return err
 	}
 

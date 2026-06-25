@@ -23,14 +23,14 @@ type WebSocketService interface {
 	HandleClientMessage(ctx context.Context, req dto.EventRequest, sendChan chan *messagev1.WebSocketMessage) error
 }
 
-type serverWebSocket struct {
+type ServerWebSocket struct {
 	serv    WebSocketService
 	mu      *sync.RWMutex
 	clients map[int64]chan *messagev1.WebSocketMessage
 }
 
-func NewServerWebSocket(serv WebSocketService) *serverWebSocket {
-	return &serverWebSocket{
+func NewServerWebSocket(serv WebSocketService) *ServerWebSocket {
+	return &ServerWebSocket{
 		serv:    serv,
 		mu:      &sync.RWMutex{},
 		clients: make(map[int64]chan *messagev1.WebSocketMessage),
@@ -48,12 +48,12 @@ func (s *serverAPI) ConnectWebSocket(req *messagev1.ConnectWebSocketRequest, str
 	s.ws.mu.Unlock()
 
 	defer func() {
+		close(msgChan)
+		close(errChan)
+
 		s.ws.mu.Lock()
 		delete(s.ws.clients, clientID)
 		s.ws.mu.Unlock()
-
-		close(msgChan)
-		close(errChan)
 	}()
 
 	// функция для перехавата сообщений чата

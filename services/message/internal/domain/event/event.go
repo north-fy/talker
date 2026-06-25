@@ -1,15 +1,18 @@
 package event
 
-import "context"
+import (
+	"context"
+)
 
 type Event interface {
-	Type() string
-	AggregateID() string
-	Payload() []byte
+	GetType() int32
+	GetChatID() int64
+	GetData() []byte
 }
 
 type EventBus interface {
-	Publish(ctx context.Context, event Event) error
-	Subscribe(ctx context.Context, aggregateID string) (<-chan Event, error)
+	Publish(ctx context.Context, ev Event) error
+	Subscribe(ctx context.Context, chatID int64) (<-chan Event, error)
 	Close() error
 }
+

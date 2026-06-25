@@ -111,6 +111,7 @@ func (s *serverAPI) DeleteMessage(ctx context.Context, req *messagev1.DeleteMess
 	msgReq := dto.DeleteMessageRequest{
 		MessageID:   req.GetMessageId(),
 		ForEveryone: req.GetForEveryone(),
+		ChatID:      req.GetChatId(),
 	}
 
 	isDeleted, err := s.serv.DeleteMessage(ctx, msgReq)

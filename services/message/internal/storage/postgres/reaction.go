@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
@@ -36,26 +37,23 @@ func (s *Storage) InsertReaction(ctx context.Context, req dto.AddReactionRequest
 		true
 	)
 	WHERE id = $2
+	RETURNING reactions
 	`
 
-	ct, err := s.conn.Exec(ctx, query, req.Reaction, req.MessageID)
-	if err != nil {
+	var react json.RawMessage
+	if err := s.conn.QueryRow(ctx, query, req.Reaction, req.MessageID).Scan(&react); err != nil {
 		return dto.Reaction{}, err
-	}
-
-	if ct.RowsAffected() == 0 {
-		return dto.Reaction{}, sql.ErrNoRows
 	}
 
 	return dto.Reaction{
 		MessageID: req.MessageID,
 		UserID:    req.UserID,
-		Reaction:  req.Reaction,
+		Reaction:  string(react),
 		CreatedAt: time.Now(),
 	}, nil
 }
 
-func (s *Storage) DeleteReaction(ctx context.Context, req dto.RemoveReactionRequest) error {
+func (s *Storage) DeleteReaction(ctx context.Context, req dto.RemoveReactionRequest) (string, error) {
 	query := `
 	UPDATE messages
 	SET reactions = CASE 
@@ -63,16 +61,13 @@ func (s *Storage) DeleteReaction(ctx context.Context, req dto.RemoveReactionRequ
 		ELSE reactions || jsonb_build_object($1, (reactions->>$1)::int - 1)
 	END
 	WHERE id = $2
+	RETURNING reactions
     `
 
-	ct, err := s.conn.Exec(ctx, query, req.Reaction, req.MessageID)
-	if err != nil {
-		return err
+	var react json.RawMessage
+	if err := s.conn.QueryRow(ctx, query, req.Reaction, req.MessageID).Scan(&react); err != nil {
+		return "", err
 	}
 
-	if ct.RowsAffected() == 0 {
-		return sql.ErrNoRows
-	}
-
-	return nil
+	return string(react), nil
 }
