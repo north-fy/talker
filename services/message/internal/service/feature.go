@@ -39,10 +39,11 @@ type FeatureService struct {
 	eventbus event.EventBus
 }
 
-func NewFeatureService(log *zap.Logger, storage StorageFeature) *FeatureService {
+func NewFeatureService(log *zap.Logger, storage StorageFeature, bus event.EventBus) *FeatureService {
 	return &FeatureService{
-		log:     log,
-		storage: storage,
+		log:      log,
+		storage:  storage,
+		eventbus: bus,
 	}
 }
 
