@@ -2,12 +2,12 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 
 	messagev1 "github.com/north-fy/talker/pkg/protos/message"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/event"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type WebSocketService struct {
@@ -38,7 +38,7 @@ func (serv *WebSocketService) HandleClientMessage(ctx context.Context, req dto.E
 
 		case subMsg := <-ch:
 			var wsMsg messagev1.WebSocketMessage
-			if err := json.Unmarshal(subMsg.GetData(), &wsMsg); err != nil {
+			if err := protojson.Unmarshal(subMsg.GetData(), &wsMsg); err != nil {
 				serv.log.Error("failed to unmarshal message",
 					zap.Int64("chat_id", subMsg.GetChatID()),
 					zap.Int32("type", subMsg.GetType()),

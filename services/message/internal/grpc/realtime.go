@@ -49,7 +49,6 @@ func (s *serverAPI) ConnectWebSocket(req *messagev1.ConnectWebSocketRequest, str
 
 	defer func() {
 		close(msgChan)
-		close(errChan)
 
 		s.ws.mu.Lock()
 		delete(s.ws.clients, clientID)
@@ -60,7 +59,10 @@ func (s *serverAPI) ConnectWebSocket(req *messagev1.ConnectWebSocketRequest, str
 	go func() {
 		err := s.ws.serv.HandleClientMessage(stream.Context(), dto.EventRequest{ChatID: chatID, UserID: clientID}, msgChan)
 		if err != nil {
-			 errChan <- err
+			select {
+			case errChan <- err:
+			default:
+			}
 		}
 	}()
 
