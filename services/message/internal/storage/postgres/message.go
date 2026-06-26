@@ -31,7 +31,7 @@ func (s *Storage) CreateMessage(ctx context.Context, senderID int64, req dto.Sen
 	// TODO: add type conversion
 	query := `
 	INSERT INTO messages(chat_id, sender_id, content, reply_to, attachments, reactions)
-	VALUES ($1, $2, $3, $4, $5)
+	VALUES ($1, $2, $3, $4, $5, $6)
 	RETURNING id, type, reactions, is_edited, is_deleted, created_at
 	`
 
