@@ -31,25 +31,25 @@ func NewReactionService(log *zap.Logger, storage StorageReaction, ev event.Event
 }
 
 func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRequest) (dto.Reaction, error) {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
 	req.UserID = ctx.Value(models.UserIDKey).(int64)
 
 	react, err := s.storage.InsertReaction(ctx, req)
 	if err != nil {
-		s.log.Error("failed to create reaction", zap.Error(err))
+		log.Error("failed to create reaction", zap.Error(err))
 		return dto.Reaction{}, err
 	}
 
 	var mapReact map[string]any
 	if err = json.Unmarshal([]byte(react.Reaction), &mapReact); err != nil {
-		s.log.Error("failed to unmarshal reactions", zap.Error(err))
+		log.Error("failed to unmarshal reactions", zap.Error(err))
 		return dto.Reaction{}, err
 	}
 
 	count, ok := mapReact[req.Reaction].(int32)
 	if !ok {
-		s.log.Error("failed to get reaction count", zap.Any("reaction", mapReact))
+		log.Error("failed to get reaction count", zap.Any("reaction", mapReact))
 		return dto.Reaction{}, err
 	}
 
@@ -66,7 +66,7 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		log.Error("failed to marshal websocket data", zap.Error(err))
 		return dto.Reaction{}, err
 	}
 
@@ -77,7 +77,7 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 	}
 
 	if err = s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
 		return dto.Reaction{}, err
@@ -87,25 +87,25 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 }
 
 func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReactionRequest) error {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
 	req.UserID = ctx.Value(models.UserIDKey).(int64)
 
 	react, err := s.storage.DeleteReaction(ctx, req)
 	if err != nil {
-		s.log.Error("failed to delete reaction", zap.Error(err))
+		log.Error("failed to delete reaction", zap.Error(err))
 		return err
 	}
 
 	var mapReact map[string]any
 	if err = json.Unmarshal([]byte(react), &mapReact); err != nil {
-		s.log.Error("failed to unmarshal reactions", zap.Error(err))
+		log.Error("failed to unmarshal reactions", zap.Error(err))
 		return err
 	}
 
 	count, ok := mapReact[req.Reaction].(int32)
 	if !ok {
-		s.log.Error("failed to get reaction count", zap.Any("reaction", mapReact))
+		log.Error("failed to get reaction count", zap.Any("reaction", mapReact))
 		return err
 	}
 
@@ -122,7 +122,7 @@ func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReac
 
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		log.Error("failed to marshal websocket data", zap.Error(err))
 		return err
 	}
 
@@ -133,7 +133,7 @@ func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReac
 	}
 
 	if err = s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
 		return err

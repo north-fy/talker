@@ -23,7 +23,7 @@ func NewWebSocketService(log *zap.Logger, bus event.EventBus) *WebSocketService 
 }
 
 func (serv *WebSocketService) HandleClientMessage(ctx context.Context, req dto.EventRequest, sendChan chan *messagev1.WebSocketMessage) error {
-	serv.log = serv.log.With(zap.Int64("chat_id", req.ChatID), zap.Int64("user_id", req.UserID))
+	log := serv.log.With(zap.Int64("chat_id", req.ChatID), zap.Int64("user_id", req.UserID))
 
 	ch, err := serv.eventbus.Subscribe(ctx, req.ChatID)
 	if err != nil {
@@ -33,13 +33,13 @@ func (serv *WebSocketService) HandleClientMessage(ctx context.Context, req dto.E
 	for {
 		select {
 		case <-ctx.Done():
-			serv.log.Warn("context is done:", zap.Error(ctx.Err()))
+			log.Warn("context is done:", zap.Error(ctx.Err()))
 			return ctx.Err()
 
 		case subMsg := <-ch:
 			var wsMsg messagev1.WebSocketMessage
 			if err := protojson.Unmarshal(subMsg.GetData(), &wsMsg); err != nil {
-				serv.log.Error("failed to unmarshal message",
+				log.Error("failed to unmarshal message",
 					zap.Int64("chat_id", subMsg.GetChatID()),
 					zap.Int32("type", subMsg.GetType()),
 					zap.Error(err))

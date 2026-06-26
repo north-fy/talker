@@ -37,13 +37,13 @@ func NewMessageFuncService(log *zap.Logger, storage StorageMessage, ev event.Eve
 }
 
 func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessageRequest) (models.Message, error) {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
 	id := ctx.Value(models.UserIDKey).(int64)
 
 	msg, err := s.storage.CreateMessage(ctx, id, req)
 	if err != nil {
-		s.log.Error("failed to create message", zap.Error(err))
+		log.Error("failed to create message", zap.Error(err))
 		return models.Message{}, err
 	}
 
@@ -56,7 +56,7 @@ func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessag
 	}
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		log.Error("failed to marshal websocket data", zap.Error(err))
 		return msg, err
 	}
 
@@ -67,7 +67,7 @@ func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessag
 	}
 
 	if err := s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
 		return msg, err
@@ -79,11 +79,11 @@ func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessag
 func (s *MessageFuncService) GetMessages(ctx context.Context, req dto.GetMessagesRequest) (dto.GetMessagesResponse, error) {
 	// TODO: добавить проверку на доступ к чат id
 
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
 	messages, err := s.storage.SelectMessages(ctx, req)
 	if err != nil {
-		s.log.Error("failed to select messages", zap.Error(err))
+		log.Error("failed to select messages", zap.Error(err))
 		return dto.GetMessagesResponse{}, err
 	}
 
@@ -107,11 +107,11 @@ func (s *MessageFuncService) GetMessages(ctx context.Context, req dto.GetMessage
 func (s *MessageFuncService) EditMessage(ctx context.Context, req dto.EditMessageRequest) (models.Message, error) {
 	// TODO: добавить проверку на доступ к сообщению и чату
 
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
 	msg, err := s.storage.UpdateMessage(ctx, req)
 	if err != nil {
-		s.log.Error("failed to update message", zap.Error(err))
+		log.Error("failed to update message", zap.Error(err))
 		return models.Message{}, err
 	}
 
@@ -126,7 +126,7 @@ func (s *MessageFuncService) EditMessage(ctx context.Context, req dto.EditMessag
 	}
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		log.Error("failed to marshal websocket data", zap.Error(err))
 		return msg, err
 	}
 
@@ -137,7 +137,7 @@ func (s *MessageFuncService) EditMessage(ctx context.Context, req dto.EditMessag
 	}
 
 	if err := s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
 		return msg, err
@@ -153,7 +153,7 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	// TODO: То есть делать 2 метода у storage по ForEveryone
 	// DONE
 
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
 	var err error
 	if req.ForEveryone {
@@ -163,7 +163,7 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	}
 
 	if err != nil {
-		s.log.Error("failed to delete message", zap.Error(err))
+		log.Error("failed to delete message", zap.Error(err))
 		return false, err
 	}
 
@@ -177,7 +177,7 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	}
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		log.Error("failed to marshal websocket data", zap.Error(err))
 		return true, err
 	}
 
@@ -188,7 +188,7 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	}
 
 	if err := s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
 		return false, err
@@ -200,11 +200,11 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 func (s *MessageFuncService) GetMessage(ctx context.Context, req dto.GetMessageRequest) (models.Message, error) {
 	// TODO: добавить проверку на доступ к чату??
 
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
 	msg, err := s.storage.SelectMessage(ctx, req.MessageID)
 	if err != nil {
-		s.log.Error("failed to select message", zap.Error(err))
+		log.Error("failed to select message", zap.Error(err))
 		return models.Message{}, err
 	}
 
