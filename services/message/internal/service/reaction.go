@@ -3,8 +3,11 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
+	"github.com/jackc/pgx/v5"
 	messagev1 "github.com/north-fy/talker/pkg/protos/message"
+	"github.com/north-fy/talker/services/message/internal/domain"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/event"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
@@ -33,12 +36,15 @@ func NewReactionService(log *zap.Logger, storage StorageReaction, ev event.Event
 func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRequest) (dto.Reaction, error) {
 	log := s.log.With(zap.Any("request", req))
 
-	req.UserID = ctx.Value(models.UserIDKey).(int64)
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return dto.Reaction{}, domain.ErrInvalidStruct
+	}
 
 	react, err := s.storage.InsertReaction(ctx, req)
 	if err != nil {
 		log.Error("failed to create reaction", zap.Error(err))
-		return dto.Reaction{}, err
+		return dto.Reaction{}, domain.ErrInternalStorage
 	}
 
 	var mapReact map[string]any
@@ -80,7 +86,7 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
-		return dto.Reaction{}, err
+		return dto.Reaction{}, domain.ErrWebSocketPublish
 	}
 
 	return react, nil
@@ -89,12 +95,22 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReactionRequest) error {
 	log := s.log.With(zap.Any("request", req))
 
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return domain.ErrInvalidStruct
+	}
+
 	req.UserID = ctx.Value(models.UserIDKey).(int64)
 
 	react, err := s.storage.DeleteReaction(ctx, req)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("reaction not found", zap.Error(err))
+			return domain.ErrReactionNotFound
+		}
+
 		log.Error("failed to delete reaction", zap.Error(err))
-		return err
+		return domain.ErrInternalStorage
 	}
 
 	var mapReact map[string]any
@@ -136,7 +152,7 @@ func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReac
 		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
-		return err
+		return domain.ErrWebSocketPublish
 	}
 
 	return nil

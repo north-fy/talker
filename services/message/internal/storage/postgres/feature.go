@@ -2,9 +2,8 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
 )
@@ -62,7 +61,7 @@ func (s *Storage) SetAsRead(ctx context.Context, req dto.MarkAsReadRequest) erro
 	}
 
 	if ct.RowsAffected() == 0 {
-		return sql.ErrNoRows
+		return pgx.ErrNoRows
 	}
 
 	return nil
@@ -116,7 +115,7 @@ func (s *Storage) DeleteChatMessages(ctx context.Context, req dto.DeleteChatMess
 	}
 
 	if ct.RowsAffected() == 0 {
-		return sql.ErrNoRows
+		return pgx.ErrNoRows
 	}
 
 	return nil

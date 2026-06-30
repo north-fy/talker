@@ -4,6 +4,7 @@ import (
 	"context"
 
 	messagev1 "github.com/north-fy/talker/pkg/protos/message"
+	"github.com/north-fy/talker/services/message/internal/domain"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/event"
 	"go.uber.org/zap"
@@ -27,7 +28,8 @@ func (serv *WebSocketService) HandleClientMessage(ctx context.Context, req dto.E
 
 	ch, err := serv.eventbus.Subscribe(ctx, req.ChatID)
 	if err != nil {
-		return err
+		log.Error("failed to subscribe eventbus", zap.Error(err))
+		return domain.ErrWebSocketSubscribe
 	}
 
 	for {
@@ -40,7 +42,6 @@ func (serv *WebSocketService) HandleClientMessage(ctx context.Context, req dto.E
 			var wsMsg messagev1.WebSocketMessage
 			if err := protojson.Unmarshal(subMsg.GetData(), &wsMsg); err != nil {
 				log.Error("failed to unmarshal message",
-					zap.Int64("chat_id", subMsg.GetChatID()),
 					zap.Int32("type", subMsg.GetType()),
 					zap.Error(err))
 				return err
@@ -50,4 +51,3 @@ func (serv *WebSocketService) HandleClientMessage(ctx context.Context, req dto.E
 		}
 	}
 }
-

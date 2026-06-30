@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
 )
@@ -120,7 +121,7 @@ func (s *Storage) DeleteMessageForUser(ctx context.Context, id int64) error {
 	}
 
 	if ct.RowsAffected() == 0 {
-		return sql.ErrNoRows
+		return pgx.ErrNoRows
 	}
 
 	return nil
@@ -138,7 +139,7 @@ func (s *Storage) DeleteMessage(ctx context.Context, id int64) error {
 	}
 
 	if ct.RowsAffected() == 0 {
-		return sql.ErrNoRows
+		return pgx.ErrNoRows
 	}
 
 	return nil
