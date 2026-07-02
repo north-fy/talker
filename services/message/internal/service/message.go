@@ -187,7 +187,7 @@ func (s *MessageFuncService) EditMessage(ctx context.Context, req dto.EditMessag
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
 		log.Error("failed to marshal websocket data", zap.Error(err))
-		return msg, err
+		return msg, domain.ErrInternalStorage
 	}
 
 	ev := event.MessageEvent{
@@ -247,7 +247,7 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
 		log.Error("failed to marshal websocket data", zap.Error(err))
-		return true, err
+		return false, domain.ErrInternalStorage
 	}
 
 	ev := event.MessageEvent{

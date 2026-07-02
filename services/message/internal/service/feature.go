@@ -73,9 +73,7 @@ func (s *FeatureService) SearchMessages(ctx context.Context, req dto.SearchMessa
 		Messages: messages,
 	}
 
-	if len(messages) > 0 {
-		resp.HasMore = true
-	}
+	resp.HasMore = len(messages) == int(req.Limit)
 
 	return resp, nil
 }
@@ -107,7 +105,7 @@ func (s *FeatureService) MarkAsRead(ctx context.Context, req dto.MarkAsReadReque
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
 		log.Error("failed to marshal websocket data", zap.Error(err))
-		return err
+		return domain.ErrInternalStorage
 	}
 
 	ev := event.MessageEvent{

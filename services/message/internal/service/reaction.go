@@ -73,7 +73,7 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
 		log.Error("failed to marshal websocket data", zap.Error(err))
-		return dto.Reaction{}, err
+		return dto.Reaction{}, domain.ErrInternalStorage
 	}
 
 	ev := event.MessageEvent{
@@ -94,6 +94,14 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 
 func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReactionRequest) error {
 	log := s.log.With(zap.Any("request", req))
+
+	UserID, ok := ctx.Value(models.UserIDKey).(int64)
+	if !ok {
+		log.Error("failed to get user id from context")
+		return domain.ErrNotAuthenticated
+	}
+
+	req.UserID = UserID
 
 	if err := Validator.StructCtx(ctx, &req); err != nil {
 		log.Error("failed to validate request", zap.Error(err))
@@ -122,7 +130,7 @@ func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReac
 	count, ok := mapReact[req.Reaction].(int32)
 	if !ok {
 		log.Error("failed to get reaction count", zap.Any("reaction", mapReact))
-		return err
+		return domain.ErrInvalidReaction
 	}
 
 	wsData := messagev1.WebSocketMessage{
@@ -139,7 +147,7 @@ func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReac
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
 		log.Error("failed to marshal websocket data", zap.Error(err))
-		return err
+		return domain.ErrInternalStorage
 	}
 
 	ev := event.MessageEvent{
