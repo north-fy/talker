@@ -26,7 +26,7 @@ func TestReactionService_AddReaction(t *testing.T) {
 	}{
 		{
 			name: "success",
-			req:  dto.AddReactionRequest{MessageID: 10, Reaction: "👍"},
+			req:  dto.AddReactionRequest{MessageID: 10, Reaction: "👍", UserID: 1},
 			storageFn: func() *mocks.MockStorageReaction {
 				return &mocks.MockStorageReaction{
 					InsertReactionFn: func(_ context.Context, _ dto.AddReactionRequest) (dto.Reaction, error) {
@@ -48,7 +48,7 @@ func TestReactionService_AddReaction(t *testing.T) {
 		},
 		{
 			name: "storage error",
-			req:  dto.AddReactionRequest{MessageID: 10, Reaction: "👍"},
+			req:  dto.AddReactionRequest{MessageID: 10, Reaction: "👍", UserID: 1},
 			storageFn: func() *mocks.MockStorageReaction {
 				return &mocks.MockStorageReaction{
 					InsertReactionFn: func(_ context.Context, _ dto.AddReactionRequest) (dto.Reaction, error) {
@@ -63,7 +63,7 @@ func TestReactionService_AddReaction(t *testing.T) {
 		},
 		{
 			name: "invalid reaction json",
-			req:  dto.AddReactionRequest{MessageID: 10, Reaction: "👍"},
+			req:  dto.AddReactionRequest{MessageID: 10, Reaction: "👍", UserID: 1},
 			storageFn: func() *mocks.MockStorageReaction {
 				return &mocks.MockStorageReaction{
 					InsertReactionFn: func(_ context.Context, _ dto.AddReactionRequest) (dto.Reaction, error) {
@@ -101,7 +101,7 @@ func TestReactionService_RemoveReaction(t *testing.T) {
 	}{
 		{
 			name: "success",
-			req:  dto.RemoveReactionRequest{MessageID: 10, Reaction: "👍"},
+			req:  dto.RemoveReactionRequest{MessageID: 10, Reaction: "👍", UserID: 1},
 			storageFn: func() *mocks.MockStorageReaction {
 				return &mocks.MockStorageReaction{
 					DeleteReactionFn: func(_ context.Context, _ dto.RemoveReactionRequest) (string, error) {
@@ -118,7 +118,7 @@ func TestReactionService_RemoveReaction(t *testing.T) {
 		},
 		{
 			name: "storage error",
-			req:  dto.RemoveReactionRequest{MessageID: 10, Reaction: "👍"},
+			req:  dto.RemoveReactionRequest{MessageID: 10, Reaction: "👍", UserID: 1},
 			storageFn: func() *mocks.MockStorageReaction {
 				return &mocks.MockStorageReaction{
 					DeleteReactionFn: func(_ context.Context, _ dto.RemoveReactionRequest) (string, error) {

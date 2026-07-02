@@ -20,16 +20,16 @@ CREATE TABLE read_receipts (
 */
 
 func (s *Storage) SearchMessages(ctx context.Context, req dto.SearchMessagesRequest) ([]*models.Message, error) {
-	sqlQuery := "%" + req.Query + "%"
-
 	query := `
 	SELECT id, chat_id, sender_id, content, type, reply_to, attachments, reactions, 
 	       is_edited, is_deleted, created_at, updated_at FROM messages
-	WHERE chat_id = $1 AND content LIKE $2 AND id > $3
+	WHERE chat_id = $1 
+	  AND content @@ plainto_tsquery('russian', $2)
+	  AND id > $3
 	LIMIT $4
 	`
 
-	rows, err := s.conn.Query(ctx, query, req.ChatID, sqlQuery, req.Before, req.Limit)
+	rows, err := s.conn.Query(ctx, query, req.ChatID, req.Query, req.Before, req.Limit)
 	if err != nil {
 		return nil, err
 	}
