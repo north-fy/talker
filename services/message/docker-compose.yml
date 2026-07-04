@@ -33,7 +33,7 @@ services:
       - message-network
 
   redis:
-    image: redis:7.4-alpine
+    image: redis:8.8-alpine
     container_name: message-redis
     command: redis-server --requirepass redis
     ports:

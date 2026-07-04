@@ -24,7 +24,7 @@ func (s *Storage) SearchMessages(ctx context.Context, req dto.SearchMessagesRequ
 	SELECT id, chat_id, sender_id, content, type, reply_to, attachments, reactions, 
 	       is_edited, is_deleted, created_at, updated_at FROM messages
 	WHERE chat_id = $1 
-	  AND content @@ plainto_tsquery('russian', $2)
+	  AND content_tsvector @@ plainto_tsquery('russian', $2)
 	  AND id > $3
 	LIMIT $4
 	`
