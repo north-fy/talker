@@ -4,9 +4,9 @@ import "time"
 
 type Message struct {
 	ID           int64
-	ChatID       int64  `validate:"required"`
-	SenderID     int64  `validate:"required"`
-	Content      string `validate:"required,max=255"`
+	ChatID       int64
+	SenderID     int64
+	Content      string
 	MessageType  string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time

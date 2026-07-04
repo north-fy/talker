@@ -41,7 +41,7 @@ type Service struct {
 func RegisterService(log *zap.Logger, db *postgres.Storage, bus *redis.Storage) *Service {
 	msgServ := service.NewMessageFuncService(log, db, bus)
 	reactServ := service.NewReactionService(log, db, bus)
-	featureServ := service.NewFeatureService(log, db)
+	featureServ := service.NewFeatureService(log, db, bus)
 
 	return &Service{
 		msgServ,

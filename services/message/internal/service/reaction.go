@@ -53,10 +53,10 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 		return dto.Reaction{}, err
 	}
 
-	count, ok := mapReact[req.Reaction].(int32)
+	count, ok := mapReact[req.Reaction].(float64)
 	if !ok {
 		log.Error("failed to get reaction count", zap.Any("reaction", mapReact))
-		return dto.Reaction{}, err
+		return dto.Reaction{}, domain.ErrInvalidReaction
 	}
 
 	wsData := messagev1.WebSocketMessage{
@@ -65,7 +65,7 @@ func (s *ReactionService) AddReaction(ctx context.Context, req dto.AddReactionRe
 				MessageId: react.MessageID,
 				UserId:    react.UserID,
 				Reaction:  react.Reaction,
-				NewCount:  count,
+				NewCount:  int32(count),
 			},
 		},
 	}
@@ -127,7 +127,7 @@ func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReac
 		return err
 	}
 
-	count, ok := mapReact[req.Reaction].(int32)
+	count, ok := mapReact[req.Reaction].(float64)
 	if !ok {
 		log.Error("failed to get reaction count", zap.Any("reaction", mapReact))
 		return domain.ErrInvalidReaction
@@ -139,7 +139,7 @@ func (s *ReactionService) RemoveReaction(ctx context.Context, req dto.RemoveReac
 				MessageId: req.MessageID,
 				UserId:    req.UserID,
 				Reaction:  req.Reaction,
-				NewCount:  count,
+				NewCount:  int32(count),
 			},
 		},
 	}

@@ -40,14 +40,14 @@ type GetMessagesResponse struct {
 }
 
 type EditMessageRequest struct {
-	MessageID int64 `validate:"required"`
-	Content   string`validate:"required,max=255"`
+	MessageID int64    `validate:"required"`
+	Content   string   `validate:"required,max=255"`
 }
 
 type DeleteMessageRequest struct {
-	MessageID   int64`validate:"required"`
+	MessageID   int64 `validate:"required"`
 	ForEveryone bool
-	ChatID      int64`validate:"required"`
+	ChatID      int64 `validate:"required"`
 }
 
 type GetMessageRequest struct {
@@ -61,9 +61,9 @@ type AddReactionRequest struct {
 }
 
 type RemoveReactionRequest struct {
-	MessageID int64 `validate:"required"`
-	Reaction  string`validate:"required"`
-	UserID    int64 `validate:"required"`
+	MessageID int64    `validate:"required"`
+	Reaction  string   `validate:"required"`
+	UserID    int64    `validate:"required"`
 }
 
 type SearchMessagesRequest struct {
@@ -109,9 +109,9 @@ type DeleteChatMessagesRequest struct {
 }
 
 type Reaction struct {
-	MessageID  int64 `validate:"required"`
-	UserID     int64 `validate:"required"`
-	Reaction   string `validate:"required"`
-	CreatedAt  time.Time
+	MessageID int64
+	UserID    int64
+	Reaction  string
+	CreatedAt time.Time
 }
 

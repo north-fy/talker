@@ -24,7 +24,7 @@ func TestFeatureService_SearchMessages(t *testing.T) {
 	}{
 		{
 			name: "found messages",
-			req:  dto.SearchMessagesRequest{ChatID: 10, Query: "hello"},
+			req:  dto.SearchMessagesRequest{ChatID: 10, Query: "hello", Limit: 2},
 			storageFn: func() *mocks.MockStorageFeature {
 				return &mocks.MockStorageFeature{
 					SearchMessagesFn: func(_ context.Context, _ dto.SearchMessagesRequest) ([]*models.Message, error) {
@@ -37,7 +37,7 @@ func TestFeatureService_SearchMessages(t *testing.T) {
 		},
 		{
 			name: "no messages",
-			req:  dto.SearchMessagesRequest{ChatID: 10, Query: "nonexistent"},
+			req:  dto.SearchMessagesRequest{ChatID: 10, Query: "nonexistent", Limit: 10},
 			storageFn: func() *mocks.MockStorageFeature {
 				return &mocks.MockStorageFeature{
 					SearchMessagesFn: func(_ context.Context, _ dto.SearchMessagesRequest) ([]*models.Message, error) {
