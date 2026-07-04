@@ -34,7 +34,7 @@ func (s *serverAPI) SendMessage(ctx context.Context, req *messagev1.SendMessageR
 
 	message, err := s.serv.SendMessage(ctx, msgReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid argument")
+		return nil, toGRPC(err)
 	}
 
 	ReplyInfoTmp := &messagev1.ReplyInfo{
@@ -43,7 +43,6 @@ func (s *serverAPI) SendMessage(ctx context.Context, req *messagev1.SendMessageR
 		ContentPreview: message.ReplyInfoMsg.ContentPreview,
 	}
 
-	// convert msgType to messagev1.MessageType
 	var msgTypes messagev1.MessageType
 	tmpType := int32(msgType)
 
@@ -81,7 +80,7 @@ func (s *serverAPI) GetMessages(ctx context.Context, req *messagev1.GetMessagesR
 
 	msgResp, err := s.serv.GetMessages(ctx, msgReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, toGRPC(err)
 	}
 
 	messages := utils.ParallelConvert(msgResp.Messages, workers)
@@ -101,7 +100,7 @@ func (s *serverAPI) EditMessage(ctx context.Context, req *messagev1.EditMessageR
 
 	msg, err := s.serv.EditMessage(ctx, msgReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, toGRPC(err)
 	}
 
 	return utils.ConvertToProtoMessage(&msg), nil
@@ -116,7 +115,10 @@ func (s *serverAPI) DeleteMessage(ctx context.Context, req *messagev1.DeleteMess
 
 	isDeleted, err := s.serv.DeleteMessage(ctx, msgReq)
 	if err != nil || !isDeleted {
-		return nil, status.Error(codes.Internal, "internal error")
+		if err != nil {
+			return nil, toGRPC(err)
+		}
+		return nil, status.Error(codes.Internal, "failed to delete message")
 	}
 
 	return nil, nil
@@ -129,7 +131,7 @@ func (s *serverAPI) GetMessage(ctx context.Context, req *messagev1.GetMessageReq
 
 	msg, err := s.serv.GetMessage(ctx, msgReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, toGRPC(err)
 	}
 
 	return utils.ConvertToProtoMessage(&msg), nil

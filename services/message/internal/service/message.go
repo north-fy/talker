@@ -3,8 +3,12 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
+	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5"
 	messagev1 "github.com/north-fy/talker/pkg/protos/message"
+	"github.com/north-fy/talker/services/message/internal/domain"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/event"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
@@ -37,14 +41,37 @@ func NewMessageFuncService(log *zap.Logger, storage StorageMessage, ev event.Eve
 }
 
 func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessageRequest) (models.Message, error) {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
-	id := ctx.Value(models.UserIDKey).(int64)
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		var validationErrors validator.ValidationErrors
+		if errors.As(err, &validationErrors) {
+			for _, fe := range validationErrors {
+				switch fe.Field() {
+				case "Content":
+					if fe.Tag() == "required" {
+						return models.Message{}, domain.ErrMessageEmptyContent
+					}
+
+					return models.Message{}, domain.ErrMessageTooLong
+				default:
+					return models.Message{}, domain.ErrInvalidStruct
+				}
+			}
+		}
+
+		return models.Message{}, err
+	}
+
+	id, ok := ctx.Value(models.UserIDKey).(int64)
+	if !ok {
+		return models.Message{}, domain.ErrNotAuthenticated
+	}
 
 	msg, err := s.storage.CreateMessage(ctx, id, req)
 	if err != nil {
-		s.log.Error("failed to create message", zap.Error(err))
-		return models.Message{}, err
+		log.Error("failed to create message", zap.Error(err))
+		return models.Message{}, domain.ErrInternalStorage
 	}
 
 	wsData := messagev1.WebSocketMessage{
@@ -56,7 +83,7 @@ func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessag
 	}
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
+		log.Error("failed to marshal websocket data", zap.Error(err))
 		return msg, err
 	}
 
@@ -67,10 +94,10 @@ func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessag
 	}
 
 	if err := s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
-		return msg, err
+		return msg, domain.ErrWebSocketPublish
 	}
 
 	return msg, nil
@@ -78,13 +105,22 @@ func (s *MessageFuncService) SendMessage(ctx context.Context, req dto.SendMessag
 
 func (s *MessageFuncService) GetMessages(ctx context.Context, req dto.GetMessagesRequest) (dto.GetMessagesResponse, error) {
 	// TODO: добавить проверку на доступ к чат id
+	log := s.log.With(zap.Any("request", req))
 
-	s.log = s.log.With(zap.Any("request", req))
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return dto.GetMessagesResponse{}, domain.ErrInvalidStruct
+	}
 
 	messages, err := s.storage.SelectMessages(ctx, req)
 	if err != nil {
-		s.log.Error("failed to select messages", zap.Error(err))
-		return dto.GetMessagesResponse{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("message not found", zap.Error(err))
+			return dto.GetMessagesResponse{}, domain.ErrMessageNotFound
+		}
+
+		log.Error("failed to select messages", zap.Error(err))
+		return dto.GetMessagesResponse{}, domain.ErrInternalStorage
 	}
 
 	var (
@@ -106,13 +142,37 @@ func (s *MessageFuncService) GetMessages(ctx context.Context, req dto.GetMessage
 
 func (s *MessageFuncService) EditMessage(ctx context.Context, req dto.EditMessageRequest) (models.Message, error) {
 	// TODO: добавить проверку на доступ к сообщению и чату
+	log := s.log.With(zap.Any("request", req))
 
-	s.log = s.log.With(zap.Any("request", req))
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		var validationErrors validator.ValidationErrors
+		if errors.As(err, &validationErrors) {
+			for _, fe := range validationErrors {
+				switch fe.Field() {
+				case "Content":
+					if fe.Tag() == "required" {
+						return models.Message{}, domain.ErrMessageEmptyContent
+					}
+
+					return models.Message{}, domain.ErrMessageTooLong
+				default:
+					return models.Message{}, domain.ErrInvalidStruct
+				}
+			}
+		}
+
+		return models.Message{}, err
+	}
 
 	msg, err := s.storage.UpdateMessage(ctx, req)
 	if err != nil {
-		s.log.Error("failed to update message", zap.Error(err))
-		return models.Message{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("message not found", zap.Error(err))
+			return models.Message{}, domain.ErrMessageNotFound
+		}
+
+		log.Error("failed to update message", zap.Error(err))
+		return models.Message{}, domain.ErrInternalStorage
 	}
 
 	wsData := messagev1.WebSocketMessage{
@@ -126,8 +186,8 @@ func (s *MessageFuncService) EditMessage(ctx context.Context, req dto.EditMessag
 	}
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
-		return msg, err
+		log.Error("failed to marshal websocket data", zap.Error(err))
+		return msg, domain.ErrInternalStorage
 	}
 
 	ev := event.MessageEvent{
@@ -137,10 +197,10 @@ func (s *MessageFuncService) EditMessage(ctx context.Context, req dto.EditMessag
 	}
 
 	if err := s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
-		return msg, err
+		return msg, domain.ErrWebSocketPublish
 	}
 
 	return msg, nil
@@ -152,10 +212,14 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	// TODO: короче нужно еще проверку делать на удаление из таблицыи скрытие у одного пользователя
 	// TODO: То есть делать 2 метода у storage по ForEveryone
 	// DONE
-
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
 
 	var err error
+	if err = Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return false, domain.ErrInvalidStruct
+	}
+
 	if req.ForEveryone {
 		err = s.storage.DeleteMessage(ctx, req.MessageID)
 	} else {
@@ -163,8 +227,13 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	}
 
 	if err != nil {
-		s.log.Error("failed to delete message", zap.Error(err))
-		return false, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("message not found", zap.Error(err))
+			return false, domain.ErrMessageNotFound
+		}
+
+		log.Error("failed to delete message", zap.Error(err))
+		return false, domain.ErrInternalStorage
 	}
 
 	wsData := messagev1.WebSocketMessage{
@@ -177,8 +246,8 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	}
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
-		return true, err
+		log.Error("failed to marshal websocket data", zap.Error(err))
+		return false, domain.ErrInternalStorage
 	}
 
 	ev := event.MessageEvent{
@@ -188,10 +257,10 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 	}
 
 	if err := s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
-		return false, err
+		return false, domain.ErrWebSocketPublish
 	}
 
 	return true, nil
@@ -199,13 +268,22 @@ func (s *MessageFuncService) DeleteMessage(ctx context.Context, req dto.DeleteMe
 
 func (s *MessageFuncService) GetMessage(ctx context.Context, req dto.GetMessageRequest) (models.Message, error) {
 	// TODO: добавить проверку на доступ к чату??
+	log := s.log.With(zap.Any("request", req))
 
-	s.log = s.log.With(zap.Any("request", req))
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return models.Message{}, domain.ErrInvalidStruct
+	}
 
 	msg, err := s.storage.SelectMessage(ctx, req.MessageID)
 	if err != nil {
-		s.log.Error("failed to select message", zap.Error(err))
-		return models.Message{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("message not found", zap.Error(err))
+			return models.Message{}, domain.ErrMessageNotFound
+		}
+
+		log.Error("failed to select message", zap.Error(err))
+		return models.Message{}, domain.ErrInternalStorage
 	}
 
 	return msg, nil

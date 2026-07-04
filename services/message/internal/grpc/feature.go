@@ -7,15 +7,12 @@ import (
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
 	"github.com/north-fy/talker/services/message/pkg/utils"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type FeatureService interface {
 	SearchMessages(ctx context.Context, req dto.SearchMessagesRequest) (dto.SearchMessagesResponse, error)
 	MarkAsRead(ctx context.Context, req dto.MarkAsReadRequest) error
 	GetUnreadCount(ctx context.Context, req dto.GetUnreadCountRequest) (dto.GetUnreadCountResponse, error)
-	//ConnectWebSocket(ctx context.Context, req dto.ConnectWebSocketRequest) error
 	GetLastMessage(ctx context.Context, req dto.GetLastMessageRequest) (models.Message, error)
 	DeleteChatMessages(ctx context.Context, req dto.DeleteChatMessagesRequest) error
 }
@@ -30,7 +27,7 @@ func (s *serverAPI) SearchMessages(ctx context.Context, req *messagev1.SearchMes
 
 	msgResp, err := s.serv.SearchMessages(ctx, msgReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid argument")
+		return nil, toGRPC(err)
 	}
 
 	messages := utils.ParallelConvert(msgResp.Messages, workers)
@@ -50,7 +47,7 @@ func (s *serverAPI) MarkAsRead(ctx context.Context, req *messagev1.MarkAsReadReq
 
 	err := s.serv.MarkAsRead(ctx, msgReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid argument")
+		return nil, toGRPC(err)
 	}
 
 	return &messagev1.Empty{}, nil
@@ -64,7 +61,7 @@ func (s *serverAPI) GetUnreadCount(ctx context.Context, req *messagev1.GetUnread
 
 	msgResp, err := s.serv.GetUnreadCount(ctx, msgReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid argument")
+		return nil, toGRPC(err)
 	}
 
 	return &messagev1.GetUnreadCountResponse{
@@ -80,7 +77,7 @@ func (s *serverAPI) GetLastMessage(ctx context.Context, req *messagev1.GetLastMe
 
 	msgResp, err := s.serv.GetLastMessage(ctx, msgReq)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid argument")
+		return nil, toGRPC(err)
 	}
 
 	return utils.ConvertToProtoMessage(&msgResp), nil
@@ -92,7 +89,7 @@ func (s *serverAPI) DeleteChatMessages(ctx context.Context, req *messagev1.Delet
 	}
 
 	if err := s.serv.DeleteChatMessages(ctx, msgReq); err != nil {
-		return nil, status.Error(codes.Internal, "invalid argument")
+		return nil, toGRPC(err)
 	}
 
 	return nil, nil

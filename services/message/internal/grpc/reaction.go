@@ -5,8 +5,6 @@ import (
 
 	messagev1 "github.com/north-fy/talker/pkg/protos/message"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -23,7 +21,7 @@ func (s *serverAPI) AddReaction(ctx context.Context, req *messagev1.AddReactionR
 
 	reaction, err := s.serv.AddReaction(ctx, rectReg)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "invalid argument")
+		return nil, toGRPC(err)
 	}
 
 	return &messagev1.Reaction{
@@ -41,7 +39,7 @@ func (s *serverAPI) RemoveReaction(ctx context.Context, req *messagev1.RemoveRea
 	}
 
 	if err := s.serv.RemoveReaction(ctx, rectReg); err != nil {
-		return nil, status.Error(codes.Internal, "invalid argument")
+		return nil, toGRPC(err)
 	}
 
 	return nil, nil

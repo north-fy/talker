@@ -3,10 +3,13 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	messagev1 "github.com/north-fy/talker/pkg/protos/message"
+	"github.com/north-fy/talker/services/message/internal/domain"
 	"github.com/north-fy/talker/services/message/internal/domain/dto"
 	"github.com/north-fy/talker/services/message/internal/domain/event"
 	"github.com/north-fy/talker/services/message/internal/domain/models"
@@ -48,31 +51,44 @@ func NewFeatureService(log *zap.Logger, storage StorageFeature, bus event.EventB
 }
 
 func (s *FeatureService) SearchMessages(ctx context.Context, req dto.SearchMessagesRequest) (dto.SearchMessagesResponse, error) {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
+
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return dto.SearchMessagesResponse{}, domain.ErrInvalidStruct
+	}
 
 	messages, err := s.storage.SearchMessages(ctx, req)
 	if err != nil {
-		s.log.Error("failed to search messages", zap.Error(err))
-		return dto.SearchMessagesResponse{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("messages not found", zap.Error(err))
+			return dto.SearchMessagesResponse{}, domain.ErrMessageNotFound
+		}
+
+		log.Error("failed to search messages", zap.Error(err))
+		return dto.SearchMessagesResponse{}, domain.ErrInternalStorage
 	}
 
 	resp := dto.SearchMessagesResponse{
 		Messages: messages,
 	}
 
-	if len(messages) > 0 {
-		resp.HasMore = true
-	}
+	resp.HasMore = len(messages) == int(req.Limit)
 
 	return resp, nil
 }
 
 func (s *FeatureService) MarkAsRead(ctx context.Context, req dto.MarkAsReadRequest) error {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
+
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return domain.ErrInvalidStruct
+	}
 
 	if err := s.storage.SetAsRead(ctx, req); err != nil {
-		s.log.Error("failed to mark messages as read", zap.Error(err))
-		return err
+		log.Error("failed to mark messages as read", zap.Error(err))
+		return domain.ErrInternalStorage
 	}
 
 	wsData := messagev1.WebSocketMessage{
@@ -88,8 +104,8 @@ func (s *FeatureService) MarkAsRead(ctx context.Context, req dto.MarkAsReadReque
 
 	eventData, err := json.Marshal(&wsData)
 	if err != nil {
-		s.log.Error("failed to marshal websocket data", zap.Error(err))
-		return err
+		log.Error("failed to marshal websocket data", zap.Error(err))
+		return domain.ErrInternalStorage
 	}
 
 	ev := event.MessageEvent{
@@ -99,45 +115,70 @@ func (s *FeatureService) MarkAsRead(ctx context.Context, req dto.MarkAsReadReque
 	}
 
 	if err = s.eventbus.Publish(ctx, &ev); err != nil {
-		s.log.Error("failed to publish msg for stream",
+		log.Error("failed to publish msg for stream",
 			zap.Int64("chat_id", ev.GetChatID()),
 			zap.Error(err))
-		return err
+		return domain.ErrWebSocketPublish
 	}
 
 	return nil
 }
 
 func (s *FeatureService) GetUnreadCount(ctx context.Context, req dto.GetUnreadCountRequest) (dto.GetUnreadCountResponse, error) {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
+
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return dto.GetUnreadCountResponse{}, domain.ErrInvalidStruct
+	}
 
 	resp, err := s.storage.SelectUnreadCount(ctx, req)
 	if err != nil {
-		s.log.Error("failed to get unread count", zap.Error(err))
-		return dto.GetUnreadCountResponse{}, err
+		log.Error("failed to get unread count", zap.Error(err))
+		return dto.GetUnreadCountResponse{}, domain.ErrInternalStorage
 	}
 
-	return resp, err
+	return resp, nil
 }
 
 func (s *FeatureService) GetLastMessage(ctx context.Context, req dto.GetLastMessageRequest) (models.Message, error) {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
+
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return models.Message{}, domain.ErrInvalidStruct
+	}
 
 	resp, err := s.storage.SelectLastMessage(ctx, req)
 	if err != nil {
-		s.log.Error("failed to select last message", zap.Error(err))
-		return models.Message{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("last message not found", zap.Error(err))
+			return models.Message{}, domain.ErrMessageNotFound
+		}
+
+		log.Error("failed to select last message", zap.Error(err))
+		return models.Message{}, domain.ErrInternalStorage
 	}
 
-	return resp, err
+	return resp, nil
 }
 
 func (s *FeatureService) DeleteChatMessages(ctx context.Context, req dto.DeleteChatMessagesRequest) error {
-	s.log = s.log.With(zap.Any("request", req))
+	log := s.log.With(zap.Any("request", req))
+
+	if err := Validator.StructCtx(ctx, &req); err != nil {
+		log.Error("failed to validate request", zap.Error(err))
+		return domain.ErrInvalidStruct
+	}
 
 	if err := s.storage.DeleteChatMessages(ctx, req); err != nil {
-		s.log.Error("failed to delete chat messages", zap.Error(err))
-		return err
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Error("chat not found", zap.Error(err))
+			return domain.ErrChatNotFound
+		}
+
+		log.Error("failed to delete chat messages", zap.Error(err))
+		return domain.ErrInternalStorage
 	}
 
 	return nil
