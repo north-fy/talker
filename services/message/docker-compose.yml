@@ -21,14 +21,16 @@ services:
       - message-network
 
   migrate:
-    image: migrate/migrate:latest
-    container_name: message-migrate
-    command: -path=/migrations -database="postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" up
-    volumes:
-      - ./migrations:/migrations
+    image: migrate/migrate
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+    command:
+      - -path=/migrations
+      - -database=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+      - up
     networks:
       - message-network
 
@@ -62,7 +64,6 @@ services:
       GRPC_PORT: 50052
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_USER: redis
       REDIS_PASSWORD: redis
       REDIS_READ_TIMEOUT: 30s
       REDIS_WRITE_TIMEOUT: 30s

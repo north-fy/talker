@@ -20,7 +20,6 @@ type Storage struct {
 func NewStorage(ctx context.Context, cfg config.RedisCfg) *Storage {
 	client := redis.NewClient(&redis.Options{
 		Addr:         fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
-		Username:     cfg.User,
 		Password:     cfg.Password,
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,

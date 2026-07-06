@@ -11,4 +11,4 @@ CREATE TABLE messages (
     is_deleted BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP
-) PARTITION BY RANGE (created_at);
+);
