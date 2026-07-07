@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: chat-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chat-network
+
+  migrate:
+    image: migrate/migrate:latest
+    container_name: chat-migrate
+    command: -path=/migrations -database="postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable" up
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - chat-network
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chat-service
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      GRPC_PORT: 50053
+    ports:
+      - "50053:50053"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - chat-network
+
+volumes:
+  postgres_data:
+
+networks:
+  chat-network:
+    driver: bridge

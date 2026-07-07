@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS invite_links;
+DROP TABLE IF EXISTS chat_members;
+DROP TABLE IF EXISTS chats;
