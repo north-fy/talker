@@ -24,24 +24,25 @@ func toGRPC(err error) error {
 		errors.Is(err, domain.ErrInvalidStruct):
 		return status.Error(codes.InvalidArgument, err.Error())
 
+	// AlreadyExists
+	case errors.Is(err, domain.ErrChatAlreadyExists),
+		errors.Is(err, domain.ErrMemberAlreadyInChat):
+		return status.Error(codes.AlreadyExists, err.Error())
+
 	// PermissionDenied
 	case errors.Is(err, domain.ErrAccessDenied),
 		errors.Is(err, domain.ErrNotAuthenticated),
-		errors.Is(err, domain.ErrInsufficientRole),
-		errors.Is(err, domain.ErrCannotRemoveOwner),
-		errors.Is(err, domain.ErrCannotDeletePrivateChat):
+		errors.Is(err, domain.ErrInsufficientRole):
 		return status.Error(codes.PermissionDenied, err.Error())
 
-	// AlreadyExists
-	case errors.Is(err, domain.ErrMemberAlreadyInChat),
-		errors.Is(err, domain.ErrChatAlreadyExists):
-		return status.Error(codes.AlreadyExists, err.Error())
-
 	// FailedPrecondition
-	case errors.Is(err, domain.ErrInviteExpired),
+	case errors.Is(err, domain.ErrChatIsArchived),
+		errors.Is(err, domain.ErrCannotDeletePrivateChat),
+		errors.Is(err, domain.ErrCannotRemoveOwner),
+		errors.Is(err, domain.ErrCannotRemoveSelf),
+		errors.Is(err, domain.ErrInviteExpired),
 		errors.Is(err, domain.ErrInviteMaxUsesReached),
-		errors.Is(err, domain.ErrInviteRevoked),
-		errors.Is(err, domain.ErrChatIsArchived):
+		errors.Is(err, domain.ErrInviteRevoked):
 		return status.Error(codes.FailedPrecondition, err.Error())
 
 	// Internal

@@ -5,125 +5,79 @@ import (
 
 	"github.com/north-fy/talker/services/chat/internal/domain/dto"
 	"github.com/north-fy/talker/services/chat/internal/domain/models"
-	"github.com/north-fy/talker/services/chat/internal/storage"
 	"go.uber.org/zap"
 )
 
-type ChatService struct {
-	log    *zap.Logger
-	chat   storage.ChatStorage
-	member storage.MemberStorage
-	invite storage.InviteStorage
+type ChatFuncService struct {
+	log     *zap.Logger
+	storage ChatStorage
 }
 
-func NewChatService(log *zap.Logger, chat storage.ChatStorage, member storage.MemberStorage, invite storage.InviteStorage) *ChatService {
-	return &ChatService{
-		log:    log,
-		chat:   chat,
-		member: member,
-		invite: invite,
+type ChatStorage interface {
+	InsertChat(ctx context.Context, req dto.CreateChatRequest) (models.Chat, error)
+	SelectChat(ctx context.Context, chatID int64) (models.Chat, error)
+	SelectChats(ctx context.Context, filter dto.ChatFilter) (dto.GetChatsResponse, error)
+	UpdateChat(ctx context.Context, req dto.UpdateChatRequest) (models.Chat, error)
+}
+
+func NewChatFuncService(log *zap.Logger, storage ChatStorage) *ChatFuncService {
+	return &ChatFuncService{
+		log:     log,
+		storage: storage,
 	}
 }
 
-// ==================== Chat ====================
+// TODO: добавить валидацию на все функции
+// TODO: добавить обработку ошибок
 
-func (s *ChatService) CreateChat(ctx context.Context, req dto.CreateChatRequest, creatorID string) (models.Chat, error) {
-	// TODO: validate, create chat, add creator as OWNER
-	return models.Chat{}, nil
+func (s *ChatFuncService) CreateChat(ctx context.Context, req dto.CreateChatRequest) (models.Chat, error) {
+	log := s.log.With(zap.Any("request", req))
+
+	chat, err := s.storage.InsertChat(ctx, req)
+	if err != nil {
+		log.Error("failed to create chat", zap.Error(err))
+		return models.Chat{}, err
+	}
+
+	return chat, err
 }
 
-func (s *ChatService) GetChat(ctx context.Context, req dto.GetChatRequest) (models.Chat, error) {
-	// TODO: check access, get chat
-	return models.Chat{}, nil
+func (s *ChatFuncService) GetChat(ctx context.Context, req dto.GetChatRequest) (models.Chat, error) {
+	log := s.log.With(zap.Any("request", req))
+
+	chat, err := s.storage.SelectChat(ctx, req.ChatID)
+	if err != nil {
+		log.Error("failed to select chat", zap.Error(err))
+		return models.Chat{}, err
+	}
+
+	if !req.IncludeMembers {
+		chat.MembersCount = 0
+	}
+
+	return chat, nil
 }
 
-func (s *ChatService) GetChats(ctx context.Context, req dto.GetChatsRequest) (dto.GetChatsResponse, error) {
-	// TODO: list chats with filters
-	return dto.GetChatsResponse{}, nil
+func (s *ChatFuncService) GetChats(ctx context.Context, req dto.GetChatsRequest) (dto.GetChatsResponse, error) {
+	log := s.log.With(zap.Any("request", req))
+
+	chats, err := s.storage.SelectChats(ctx, req.Filter)
+	if err != nil {
+		log.Error("failed to select chats", zap.Error(err))
+		return dto.GetChatsResponse{}, err
+	}
+
+	return chats, nil
 }
 
-func (s *ChatService) UpdateChat(ctx context.Context, req dto.UpdateChatRequest) (models.Chat, error) {
-	// TODO: check admin/owner role, update chat
-	return models.Chat{}, nil
-}
+func (s *ChatFuncService) UpdateChat(ctx context.Context, req dto.UpdateChatRequest) (models.Chat, error) {
+	log := s.log.With(zap.Any("request", req))
 
-func (s *ChatService) DeleteChat(ctx context.Context, req dto.DeleteChatRequest) error {
-	// TODO: check owner role, delete chat and all members
-	return nil
-}
+	chat, err := s.storage.UpdateChat(ctx, req)
+	if err != nil {
+		log.Error("failed to update chat", zap.Error(err))
+		return models.Chat{}, err
+	}
 
-// ==================== Member ====================
-
-func (s *ChatService) AddMember(ctx context.Context, req dto.AddMemberRequest) (models.Member, error) {
-	// TODO: check admin role, check not already member, add member
-	return models.Member{}, nil
-}
-
-func (s *ChatService) RemoveMember(ctx context.Context, req dto.RemoveMemberRequest) error {
-	// TODO: check admin role, cannot remove owner, remove member
-	return nil
-}
-
-func (s *ChatService) GetMembers(ctx context.Context, req dto.GetMembersRequest) (dto.GetMembersResponse, error) {
-	// TODO: list members with filters
-	return dto.GetMembersResponse{}, nil
-}
-
-func (s *ChatService) GetMember(ctx context.Context, req dto.GetMemberRequest) (models.Member, error) {
-	// TODO: get member by chat_id + user_id
-	return models.Member{}, nil
-}
-
-func (s *ChatService) UpdateMemberRole(ctx context.Context, req dto.UpdateMemberRoleRequest) (models.Member, error) {
-	// TODO: check admin/owner role, update role
-	return models.Member{}, nil
-}
-
-func (s *ChatService) IsMember(ctx context.Context, req dto.GetMemberRequest) (bool, string, error) {
-	// TODO: check membership
-	return false, "", nil
-}
-
-func (s *ChatService) GetUserChats(ctx context.Context, req dto.GetUserChatsRequest) (dto.GetUserChatsResponse, error) {
-	// TODO: get all chats for user
-	return dto.GetUserChatsResponse{}, nil
-}
-
-func (s *ChatService) LeaveChat(ctx context.Context, req dto.RemoveMemberRequest) error {
-	// TODO: user leaves chat (cannot leave if owner)
-	return nil
-}
-
-// ==================== Invite ====================
-
-func (s *ChatService) CreateInviteLink(ctx context.Context, req dto.CreateInviteLinkRequest, creatorID string) (models.InviteLink, error) {
-	// TODO: check admin role, generate code, create link
-	return models.InviteLink{}, nil
-}
-
-func (s *ChatService) JoinChatByInvite(ctx context.Context, req dto.JoinChatByInviteRequest) (models.Chat, error) {
-	// TODO: validate invite, check not expired/max uses, add member
-	return models.Chat{}, nil
-}
-
-func (s *ChatService) RevokeInviteLink(ctx context.Context, req dto.RevokeInviteLinkRequest) error {
-	// TODO: check admin role, revoke invite
-	return nil
-}
-
-// ==================== Internal ====================
-
-func (s *ChatService) GetChatInternal(ctx context.Context, req dto.GetChatInternalRequest) (models.Chat, error) {
-	// TODO: internal method for other services
-	return models.Chat{}, nil
-}
-
-func (s *ChatService) GetChatsInternal(ctx context.Context, req dto.GetChatsInternalRequest) (dto.GetChatsInternalResponse, error) {
-	// TODO: batch get chats for other services
-	return dto.GetChatsInternalResponse{}, nil
-}
-
-func (s *ChatService) ValidateMemberAccess(ctx context.Context, req dto.ValidateMemberAccessRequest) (dto.ValidateMemberAccessResponse, error) {
-	// TODO: validate access for message service
-	return dto.ValidateMemberAccessResponse{}, nil
+	return chat, nil
 }

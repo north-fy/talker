@@ -6,127 +6,214 @@ import (
 	"github.com/north-fy/talker/services/chat/internal/domain/models"
 )
 
+type ChatType int32
+
+const (
+	ChatTypeUnknown ChatType = iota
+	ChatTypePrivate
+	ChatTypeGroup
+	ChatTypeChannel
+)
+
+type Role int32
+
+const (
+	RoleUnknown Role = iota
+	RoleMember
+	RoleModerator
+	RoleAdmin
+	RoleOwner
+)
+
+type PermissionType int32
+
+const (
+	PermissionUnknown PermissionType = iota
+	PermissionRead
+	PermissionWrite
+	PermissionDelete
+	PermissionManageMembers
+	PermissionUpdateSettings
+)
+
 type CreateChatRequest struct {
-	Name            string   `validate:"required"`
-	Type            string   `validate:"required"`
-	MemberIDs       []string `validate:"required"`
-	AvatarBase64    string
+	Name         string   `validate:"required,max=255"`
+	Type         ChatType `validate:"required"`
+	MemberIDs    []int64  `validate:"required,min=1"`
+	AvatarBase64 string
 }
 
 type GetChatRequest struct {
-	ChatID          string `validate:"required"`
-	IncludeMembers  bool
+	ChatID         int64 `validate:"required"`
+	IncludeMembers bool
 }
 
 type GetChatsRequest struct {
-	Type            string
+	Filter ChatFilter
+}
+
+type ChatFilter struct {
+	Type            ChatType
 	Search          string
-	ChatIDs         []string
+	ChatIDs         []int64
 	IncludeArchived bool
 }
 
 type GetChatsResponse struct {
-	Chats       []models.Chat
-	TotalCount  int64
+	Chats      []*models.Chat
+	TotalCount int64
 }
 
 type UpdateChatRequest struct {
-	ChatID      string  `validate:"required"`
-	Name        *string
+	ChatID       int64   `validate:"required"`
+	Name         *string `validate:"omitempty,max=255"`
 	AvatarBase64 *string
 }
 
-type DeleteChatRequest struct {
-	ChatID string `validate:"required"`
-}
-
-// ==================== Member ====================
-
 type AddMemberRequest struct {
-	ChatID    string `validate:"required"`
-	UserID    string `validate:"required"`
-	Role      string
-	InvitedBy string
+	ChatID    int64 `validate:"required"`
+	UserID    int64 `validate:"required"`
+	Role      Role  `validate:"required,oneof=1 2 3 4"`
+	InvitedBy int64 `validate:"required"`
 }
 
 type RemoveMemberRequest struct {
-	ChatID string `validate:"required"`
-	UserID string `validate:"required"`
+	ChatID int64 `validate:"required"`
+	UserID int64 `validate:"required"`
 }
 
 type GetMembersRequest struct {
-	ChatID     string `validate:"required"`
-	Role       string
-	Search     string
+	ChatID int64 `validate:"required"`
+	Filter MemberFilter
+}
+
+type MemberFilter struct {
+	Role   Role
+	Search string
 }
 
 type GetMembersResponse struct {
-	Members     []models.Member
-	TotalCount  int64
+	Members    []*models.Member
+	TotalCount int64
 }
 
 type UpdateMemberRoleRequest struct {
-	ChatID string `validate:"required"`
-	UserID string `validate:"required"`
-	Role   string `validate:"required"`
+	ChatID int64 `validate:"required"`
+	UserID int64 `validate:"required"`
+	Role   Role  `validate:"required"`
 }
 
 type GetMemberRequest struct {
-	ChatID string `validate:"required"`
-	UserID string `validate:"required"`
+	ChatID int64 `validate:"required"`
+	UserID int64 `validate:"required"`
+}
+
+type IsMemberRequest struct {
+	ChatID int64 `validate:"required"`
+	UserID int64 `validate:"required"`
+}
+
+type IsMemberResponse struct {
+	IsMember bool
+	Role     Role
 }
 
 type GetUserChatsRequest struct {
-	UserID              string `validate:"required"`
-	IncludeLastMessage  bool
+	UserID             int64 `validate:"required"`
+	IncludeLastMessage bool
 }
 
 type GetUserChatsResponse struct {
-	UserChats   []models.UserChat
-	TotalCount  int64
+	UserChats  []*UserChatResponse
+	TotalCount int64
 }
 
-// ==================== Invite ====================
+type UserChatResponse struct {
+	Chat        *models.Chat
+	MemberInfo  *models.Member
+	LastMessage *MessageResponse
+	UnreadCount int64
+}
 
 type CreateInviteLinkRequest struct {
-	ChatID    string `validate:"required"`
-	MaxUses   int32
-	ExpiresAt time.Time
+	ChatID    int64 `validate:"required"`
+	MaxUses   int32 `validate:"min=0"`
+	ExpiresAt *time.Time
 }
 
 type JoinChatByInviteRequest struct {
 	InviteCode string `validate:"required"`
-	UserID     string
+	UserID     int64  `validate:"required"`
 }
 
 type RevokeInviteLinkRequest struct {
-	ChatID   string `validate:"required"`
-	InviteID string `validate:"required"`
+	ChatID   int64 `validate:"required"`
+	InviteID int64 `validate:"required"`
 }
 
-// ==================== Internal ====================
+type UpdateChatSettingsRequest struct {
+	ChatID   int64 `validate:"required"`
+	Settings ChatSettings
+}
+
+type GetChatSettingsRequest struct {
+	ChatID int64 `validate:"required"`
+}
+
+type ChatSettings struct {
+	IsPrivate            bool
+	AllowMessagesFromAll bool
+	AllowMedia           bool
+	AllowReactions       bool
+	MessageTTLSeconds    int32  `validate:"min=0"`
+	Language             string `validate:"max=10"`
+	IsAnnouncement       bool
+}
 
 type GetChatInternalRequest struct {
-	ChatID         string `validate:"required"`
+	ChatID         int64 `validate:"required"`
 	IncludeMembers bool
 }
 
+type ChatInternalResponse struct {
+	ID        int64
+	Name      string
+	Type      ChatType
+	IsActive  bool
+	MemberIDs []int64
+	Settings  ChatSettings
+}
+
 type GetChatsInternalRequest struct {
-	ChatIDs []string `validate:"required"`
+	ChatIDs []int64 `validate:"required,min=1"`
 }
 
 type GetChatsInternalResponse struct {
-	Chats map[string]models.Chat
+	Chats map[int64]*ChatInternalResponse
 }
 
 type ValidateMemberAccessRequest struct {
-	ChatID   string `validate:"required"`
-	UserID   string `validate:"required"`
-	Permission string
+	ChatID             int64          `validate:"required"`
+	UserID             int64          `validate:"required"`
+	RequiredPermission PermissionType `validate:"required"`
 }
 
 type ValidateMemberAccessResponse struct {
 	HasAccess bool
-	Role      string
+	Role      Role
 	Reason    string
+}
+
+type UpdateLastReadRequest struct {
+	ChatID    int64 `validate:"required"`
+	UserID    int64 `validate:"required"`
+	MessageID int64 `validate:"required"`
+}
+
+type MessageResponse struct {
+	ID        int64
+	ChatID    int64
+	SenderID  int64
+	Content   string
+	CreatedAt time.Time
 }

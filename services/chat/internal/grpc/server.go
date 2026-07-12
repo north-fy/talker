@@ -1,22 +1,20 @@
 package grpc
 
 import (
-	messagev1 "github.com/north-fy/talker/pkg/protos/chat"
+	chatv1 "github.com/north-fy/talker/pkg/protos/chat"
 	"google.golang.org/grpc"
 )
 
 type ChatService interface {
-	ChatService
-	MemberService
-	InviteService
-	InternalService
+	// TODO: implement
+	ChatFuncService
 }
 
 type serverAPI struct {
-	messagev1.UnimplementedChatServiceServer
+	chatv1.UnimplementedChatServiceServer
 	serv ChatService
 }
 
 func Register(gRPC *grpc.Server, service ChatService) {
-	messagev1.RegisterChatServiceServer(gRPC, &serverAPI{serv: service})
+	chatv1.RegisterChatServiceServer(gRPC, &serverAPI{serv: service})
 }

@@ -3,10 +3,10 @@ package models
 import "time"
 
 type Chat struct {
-	ID          string
+	ID          int64
 	Name        string
-	Type        string
-	CreatedBy   string
+	Type        int32
+	CreatedBy   int64
 	AvatarURL   string
 	MembersCount int32
 	IsActive    bool
@@ -15,8 +15,8 @@ type Chat struct {
 }
 
 type Member struct {
-	UserID     string
-	ChatID     string
+	UserID     int64
+	ChatID     int64
 	Role       string
 	JoinedAt   time.Time
 	LastReadAt time.Time
@@ -27,8 +27,8 @@ type Member struct {
 }
 
 type InviteLink struct {
-	ID        string
-	ChatID    string
+	ID        int64
+	ChatID    int64
 	Code      string
 	URL       string
 	MaxUses   int32
@@ -37,10 +37,4 @@ type InviteLink struct {
 	CreatedAt time.Time
 	CreatedBy string
 	IsActive  bool
-}
-
-type UserChat struct {
-	Chat        Chat
-	MemberInfo  Member
-	UnreadCount int64
 }
