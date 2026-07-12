@@ -225,12 +225,11 @@ func (*Empty) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{0}
 }
 
-// Create Chat
 type CreateChatRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`                                     // Название чата
 	Type          ChatType               `protobuf:"varint,2,opt,name=type,proto3,enum=chat.v1.ChatType" json:"type,omitempty"`              // private/group/channel
-	MemberIds     []string               `protobuf:"bytes,3,rep,name=member_ids,json=memberIds,proto3" json:"member_ids,omitempty"`          // ID участников (включая создателя)
+	MemberIds     []int64                `protobuf:"varint,3,rep,packed,name=member_ids,json=memberIds,proto3" json:"member_ids,omitempty"`  // ID участников (включая создателя)
 	AvatarBase64  string                 `protobuf:"bytes,4,opt,name=avatar_base64,json=avatarBase64,proto3" json:"avatar_base64,omitempty"` // Опционально: аватар чата
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -280,7 +279,7 @@ func (x *CreateChatRequest) GetType() ChatType {
 	return ChatType_CHAT_TYPE_UNKNOWN
 }
 
-func (x *CreateChatRequest) GetMemberIds() []string {
+func (x *CreateChatRequest) GetMemberIds() []int64 {
 	if x != nil {
 		return x.MemberIds
 	}
@@ -296,10 +295,10 @@ func (x *CreateChatRequest) GetAvatarBase64() string {
 
 type Chat struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Type          ChatType               `protobuf:"varint,3,opt,name=type,proto3,enum=chat.v1.ChatType" json:"type,omitempty"`
-	CreatedBy     string                 `protobuf:"bytes,4,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedBy     int64                  `protobuf:"varint,4,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
 	AvatarUrl     string                 `protobuf:"bytes,5,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`
 	MembersCount  int32                  `protobuf:"varint,6,opt,name=members_count,json=membersCount,proto3" json:"members_count,omitempty"`
 	LastMessage   *Message               `protobuf:"bytes,7,opt,name=last_message,json=lastMessage,proto3" json:"last_message,omitempty"` // Последнее сообщение (опционально)
@@ -339,11 +338,11 @@ func (*Chat) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Chat) GetId() string {
+func (x *Chat) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *Chat) GetName() string {
@@ -360,11 +359,11 @@ func (x *Chat) GetType() ChatType {
 	return ChatType_CHAT_TYPE_UNKNOWN
 }
 
-func (x *Chat) GetCreatedBy() string {
+func (x *Chat) GetCreatedBy() int64 {
 	if x != nil {
 		return x.CreatedBy
 	}
-	return ""
+	return 0
 }
 
 func (x *Chat) GetAvatarUrl() string {
@@ -405,7 +404,7 @@ func (x *Chat) GetUpdatedAt() *timestamppb.Timestamp {
 // Get Chat
 type GetChatRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	ChatId         string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId         int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	IncludeMembers bool                   `protobuf:"varint,2,opt,name=include_members,json=includeMembers,proto3" json:"include_members,omitempty"` // Загрузить участников?
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -441,11 +440,11 @@ func (*GetChatRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetChatRequest) GetChatId() string {
+func (x *GetChatRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *GetChatRequest) GetIncludeMembers() bool {
@@ -504,7 +503,7 @@ type ChatFilter struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Type            ChatType               `protobuf:"varint,1,opt,name=type,proto3,enum=chat.v1.ChatType" json:"type,omitempty"`                        // Тип чата
 	Search          string                 `protobuf:"bytes,2,opt,name=search,proto3" json:"search,omitempty"`                                           // Поиск по названию
-	ChatIds         []string               `protobuf:"bytes,3,rep,name=chat_ids,json=chatIds,proto3" json:"chat_ids,omitempty"`                          // Конкретные чаты
+	ChatIds         []int64                `protobuf:"varint,3,rep,packed,name=chat_ids,json=chatIds,proto3" json:"chat_ids,omitempty"`                  // Конкретные чаты
 	IncludeArchived bool                   `protobuf:"varint,4,opt,name=include_archived,json=includeArchived,proto3" json:"include_archived,omitempty"` // Включать архивные?
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -554,7 +553,7 @@ func (x *ChatFilter) GetSearch() string {
 	return ""
 }
 
-func (x *ChatFilter) GetChatIds() []string {
+func (x *ChatFilter) GetChatIds() []int64 {
 	if x != nil {
 		return x.ChatIds
 	}
@@ -623,7 +622,7 @@ func (x *GetChatsResponse) GetTotalCount() int64 {
 // Update Chat
 type UpdateChatRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	Name          *string                `protobuf:"bytes,2,opt,name=name,proto3,oneof" json:"name,omitempty"`
 	AvatarBase64  *string                `protobuf:"bytes,3,opt,name=avatar_base64,json=avatarBase64,proto3,oneof" json:"avatar_base64,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -660,11 +659,11 @@ func (*UpdateChatRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *UpdateChatRequest) GetChatId() string {
+func (x *UpdateChatRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *UpdateChatRequest) GetName() string {
@@ -684,10 +683,10 @@ func (x *UpdateChatRequest) GetAvatarBase64() string {
 // Member Management
 type AddMemberRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Role          Role                   `protobuf:"varint,3,opt,name=role,proto3,enum=chat.v1.Role" json:"role,omitempty"`         // По умолчанию MEMBER
-	InvitedBy     string                 `protobuf:"bytes,4,opt,name=invited_by,json=invitedBy,proto3" json:"invited_by,omitempty"` // Кто пригласил
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Role          Role                   `protobuf:"varint,3,opt,name=role,proto3,enum=chat.v1.Role" json:"role,omitempty"`          // По умолчанию MEMBER
+	InvitedBy     int64                  `protobuf:"varint,4,opt,name=invited_by,json=invitedBy,proto3" json:"invited_by,omitempty"` // Кто пригласил
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -722,18 +721,18 @@ func (*AddMemberRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *AddMemberRequest) GetChatId() string {
+func (x *AddMemberRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *AddMemberRequest) GetUserId() string {
+func (x *AddMemberRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *AddMemberRequest) GetRole() Role {
@@ -743,17 +742,17 @@ func (x *AddMemberRequest) GetRole() Role {
 	return Role_ROLE_UNKNOWN
 }
 
-func (x *AddMemberRequest) GetInvitedBy() string {
+func (x *AddMemberRequest) GetInvitedBy() int64 {
 	if x != nil {
 		return x.InvitedBy
 	}
-	return ""
+	return 0
 }
 
 type RemoveMemberRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -788,23 +787,23 @@ func (*RemoveMemberRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *RemoveMemberRequest) GetChatId() string {
+func (x *RemoveMemberRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *RemoveMemberRequest) GetUserId() string {
+func (x *RemoveMemberRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 type GetMembersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	Filter        *MemberFilter          `protobuf:"bytes,2,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -840,11 +839,11 @@ func (*GetMembersRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *GetMembersRequest) GetChatId() string {
+func (x *GetMembersRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *GetMembersRequest) GetFilter() *MemberFilter {
@@ -960,8 +959,8 @@ func (x *GetMembersResponse) GetTotalCount() int64 {
 
 type UpdateMemberRoleRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Role          Role                   `protobuf:"varint,3,opt,name=role,proto3,enum=chat.v1.Role" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -997,18 +996,18 @@ func (*UpdateMemberRoleRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{13}
 }
 
-func (x *UpdateMemberRoleRequest) GetChatId() string {
+func (x *UpdateMemberRoleRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *UpdateMemberRoleRequest) GetUserId() string {
+func (x *UpdateMemberRoleRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *UpdateMemberRoleRequest) GetRole() Role {
@@ -1020,8 +1019,8 @@ func (x *UpdateMemberRoleRequest) GetRole() Role {
 
 type GetMemberRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1056,24 +1055,24 @@ func (*GetMemberRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *GetMemberRequest) GetChatId() string {
+func (x *GetMemberRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *GetMemberRequest) GetUserId() string {
+func (x *GetMemberRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 type Member struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
-	UserId      string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	ChatId      string                 `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId      int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId      int64                  `protobuf:"varint,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	Role        Role                   `protobuf:"varint,3,opt,name=role,proto3,enum=chat.v1.Role" json:"role,omitempty"`
 	JoinedAt    *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
 	LastReadAt  *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=last_read_at,json=lastReadAt,proto3" json:"last_read_at,omitempty"`
@@ -1116,18 +1115,18 @@ func (*Member) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *Member) GetUserId() string {
+func (x *Member) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
-func (x *Member) GetChatId() string {
+func (x *Member) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *Member) GetRole() Role {
@@ -1182,8 +1181,8 @@ func (x *Member) GetAvatarUrl() string {
 // Is Member (для других сервисов)
 type IsMemberRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1218,18 +1217,18 @@ func (*IsMemberRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{16}
 }
 
-func (x *IsMemberRequest) GetChatId() string {
+func (x *IsMemberRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *IsMemberRequest) GetUserId() string {
+func (x *IsMemberRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 type IsMemberResponse struct {
@@ -1287,7 +1286,7 @@ func (x *IsMemberResponse) GetRole() Role {
 // Get User Chats
 type GetUserChatsRequest struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
-	UserId             string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserId             int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	IncludeLastMessage bool                   `protobuf:"varint,2,opt,name=include_last_message,json=includeLastMessage,proto3" json:"include_last_message,omitempty"` // Включить последнее сообщение?
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
@@ -1323,11 +1322,11 @@ func (*GetUserChatsRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{18}
 }
 
-func (x *GetUserChatsRequest) GetUserId() string {
+func (x *GetUserChatsRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *GetUserChatsRequest) GetIncludeLastMessage() bool {
@@ -1460,7 +1459,7 @@ func (x *UserChat) GetUnreadCount() int64 {
 // Chat Settings
 type UpdateChatSettingsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	Settings      *ChatSettings          `protobuf:"bytes,2,opt,name=settings,proto3" json:"settings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1496,11 +1495,11 @@ func (*UpdateChatSettingsRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{21}
 }
 
-func (x *UpdateChatSettingsRequest) GetChatId() string {
+func (x *UpdateChatSettingsRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *UpdateChatSettingsRequest) GetSettings() *ChatSettings {
@@ -1512,7 +1511,7 @@ func (x *UpdateChatSettingsRequest) GetSettings() *ChatSettings {
 
 type GetChatSettingsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1547,11 +1546,11 @@ func (*GetChatSettingsRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *GetChatSettingsRequest) GetChatId() string {
+func (x *GetChatSettingsRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 type ChatSettings struct {
@@ -1649,7 +1648,7 @@ func (x *ChatSettings) GetIsAnnouncement() bool {
 // Invite Links
 type CreateInviteLinkRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	MaxUses       int32                  `protobuf:"varint,2,opt,name=max_uses,json=maxUses,proto3" json:"max_uses,omitempty"`      // Максимум использований (0 = без лимита)
 	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"` // Когда истекает
 	unknownFields protoimpl.UnknownFields
@@ -1686,11 +1685,11 @@ func (*CreateInviteLinkRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{24}
 }
 
-func (x *CreateInviteLinkRequest) GetChatId() string {
+func (x *CreateInviteLinkRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *CreateInviteLinkRequest) GetMaxUses() int32 {
@@ -1709,15 +1708,15 @@ func (x *CreateInviteLinkRequest) GetExpiresAt() *timestamppb.Timestamp {
 
 type InviteLink struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ChatId        string                 `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"` // Короткий код для ссылки
 	Url           string                 `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`   // Полная ссылка
 	MaxUses       int32                  `protobuf:"varint,5,opt,name=max_uses,json=maxUses,proto3" json:"max_uses,omitempty"`
 	UsedCount     int32                  `protobuf:"varint,6,opt,name=used_count,json=usedCount,proto3" json:"used_count,omitempty"`
 	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	CreatedBy     string                 `protobuf:"bytes,9,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedBy     int64                  `protobuf:"varint,9,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
 	IsActive      bool                   `protobuf:"varint,10,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1753,18 +1752,18 @@ func (*InviteLink) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{25}
 }
 
-func (x *InviteLink) GetId() string {
+func (x *InviteLink) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
-func (x *InviteLink) GetChatId() string {
+func (x *InviteLink) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *InviteLink) GetCode() string {
@@ -1809,11 +1808,11 @@ func (x *InviteLink) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *InviteLink) GetCreatedBy() string {
+func (x *InviteLink) GetCreatedBy() int64 {
 	if x != nil {
 		return x.CreatedBy
 	}
-	return ""
+	return 0
 }
 
 func (x *InviteLink) GetIsActive() bool {
@@ -1826,7 +1825,7 @@ func (x *InviteLink) GetIsActive() bool {
 type JoinChatByInviteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	InviteCode    string                 `protobuf:"bytes,1,opt,name=invite_code,json=inviteCode,proto3" json:"invite_code,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // Из контекста
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // Из контекста
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1868,17 +1867,17 @@ func (x *JoinChatByInviteRequest) GetInviteCode() string {
 	return ""
 }
 
-func (x *JoinChatByInviteRequest) GetUserId() string {
+func (x *JoinChatByInviteRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 type RevokeInviteLinkRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	InviteId      string                 `protobuf:"bytes,2,opt,name=invite_id,json=inviteId,proto3" json:"invite_id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	InviteId      int64                  `protobuf:"varint,2,opt,name=invite_id,json=inviteId,proto3" json:"invite_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1913,24 +1912,24 @@ func (*RevokeInviteLinkRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{27}
 }
 
-func (x *RevokeInviteLinkRequest) GetChatId() string {
+func (x *RevokeInviteLinkRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *RevokeInviteLinkRequest) GetInviteId() string {
+func (x *RevokeInviteLinkRequest) GetInviteId() int64 {
 	if x != nil {
 		return x.InviteId
 	}
-	return ""
+	return 0
 }
 
 // Internal Messages (для других сервисов)
 type GetChatInternalRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	ChatId         string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	ChatId         int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
 	IncludeMembers bool                   `protobuf:"varint,2,opt,name=include_members,json=includeMembers,proto3" json:"include_members,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -1966,11 +1965,11 @@ func (*GetChatInternalRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *GetChatInternalRequest) GetChatId() string {
+func (x *GetChatInternalRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
 func (x *GetChatInternalRequest) GetIncludeMembers() bool {
@@ -1982,11 +1981,11 @@ func (x *GetChatInternalRequest) GetIncludeMembers() bool {
 
 type ChatInternal struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Type          ChatType               `protobuf:"varint,3,opt,name=type,proto3,enum=chat.v1.ChatType" json:"type,omitempty"`
 	IsActive      bool                   `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	MemberIds     []string               `protobuf:"bytes,5,rep,name=member_ids,json=memberIds,proto3" json:"member_ids,omitempty"` // Список ID участников
+	MemberIds     []int64                `protobuf:"varint,5,rep,packed,name=member_ids,json=memberIds,proto3" json:"member_ids,omitempty"` // Список ID участников
 	Settings      *ChatSettings          `protobuf:"bytes,6,opt,name=settings,proto3" json:"settings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2022,11 +2021,11 @@ func (*ChatInternal) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{29}
 }
 
-func (x *ChatInternal) GetId() string {
+func (x *ChatInternal) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *ChatInternal) GetName() string {
@@ -2050,7 +2049,7 @@ func (x *ChatInternal) GetIsActive() bool {
 	return false
 }
 
-func (x *ChatInternal) GetMemberIds() []string {
+func (x *ChatInternal) GetMemberIds() []int64 {
 	if x != nil {
 		return x.MemberIds
 	}
@@ -2066,7 +2065,7 @@ func (x *ChatInternal) GetSettings() *ChatSettings {
 
 type GetChatsInternalRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatIds       []string               `protobuf:"bytes,1,rep,name=chat_ids,json=chatIds,proto3" json:"chat_ids,omitempty"`
+	ChatIds       []int64                `protobuf:"varint,1,rep,packed,name=chat_ids,json=chatIds,proto3" json:"chat_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2101,7 +2100,7 @@ func (*GetChatsInternalRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{30}
 }
 
-func (x *GetChatsInternalRequest) GetChatIds() []string {
+func (x *GetChatsInternalRequest) GetChatIds() []int64 {
 	if x != nil {
 		return x.ChatIds
 	}
@@ -2154,8 +2153,8 @@ func (x *GetChatsInternalResponse) GetChats() map[string]*ChatInternal {
 
 type ValidateMemberAccessRequest struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
-	ChatId             string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId             string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ChatId             int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId             int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	RequiredPermission PermissionType         `protobuf:"varint,3,opt,name=required_permission,json=requiredPermission,proto3,enum=chat.v1.PermissionType" json:"required_permission,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
@@ -2191,18 +2190,18 @@ func (*ValidateMemberAccessRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{32}
 }
 
-func (x *ValidateMemberAccessRequest) GetChatId() string {
+func (x *ValidateMemberAccessRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *ValidateMemberAccessRequest) GetUserId() string {
+func (x *ValidateMemberAccessRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
 func (x *ValidateMemberAccessRequest) GetRequiredPermission() PermissionType {
@@ -2275,9 +2274,9 @@ func (x *ValidateMemberAccessResponse) GetReason() string {
 // Last Read
 type UpdateLastReadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ChatId        string                 `protobuf:"bytes,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	MessageId     string                 `protobuf:"bytes,3,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"` // Последнее прочитанное сообщение
+	ChatId        int64                  `protobuf:"varint,1,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MessageId     int64                  `protobuf:"varint,3,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"` // Последнее прочитанное сообщение
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2312,33 +2311,33 @@ func (*UpdateLastReadRequest) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{34}
 }
 
-func (x *UpdateLastReadRequest) GetChatId() string {
+func (x *UpdateLastReadRequest) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *UpdateLastReadRequest) GetUserId() string {
+func (x *UpdateLastReadRequest) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
-	return ""
+	return 0
 }
 
-func (x *UpdateLastReadRequest) GetMessageId() string {
+func (x *UpdateLastReadRequest) GetMessageId() int64 {
 	if x != nil {
 		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 // Message (ссылка на Message Service)
 type Message struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ChatId        string                 `protobuf:"bytes,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
-	SenderId      string                 `protobuf:"bytes,3,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ChatId        int64                  `protobuf:"varint,2,opt,name=chat_id,json=chatId,proto3" json:"chat_id,omitempty"`
+	SenderId      int64                  `protobuf:"varint,3,opt,name=sender_id,json=senderId,proto3" json:"sender_id,omitempty"`
 	Content       string                 `protobuf:"bytes,4,opt,name=content,proto3" json:"content,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // Минимальная информация, полное сообщение в Message Service
 	unknownFields protoimpl.UnknownFields
@@ -2375,25 +2374,25 @@ func (*Message) Descriptor() ([]byte, []int) {
 	return file_chat_proto_rawDescGZIP(), []int{35}
 }
 
-func (x *Message) GetId() string {
+func (x *Message) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
-func (x *Message) GetChatId() string {
+func (x *Message) GetChatId() int64 {
 	if x != nil {
 		return x.ChatId
 	}
-	return ""
+	return 0
 }
 
-func (x *Message) GetSenderId() string {
+func (x *Message) GetSenderId() int64 {
 	if x != nil {
 		return x.SenderId
 	}
-	return ""
+	return 0
 }
 
 func (x *Message) GetContent() string {
@@ -2421,14 +2420,14 @@ const file_chat_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12%\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x11.chat.v1.ChatTypeR\x04type\x12\x1d\n" +
 	"\n" +
-	"member_ids\x18\x03 \x03(\tR\tmemberIds\x12#\n" +
+	"member_ids\x18\x03 \x03(\x03R\tmemberIds\x12#\n" +
 	"\ravatar_base64\x18\x04 \x01(\tR\favatarBase64\"\xdf\x02\n" +
 	"\x04Chat\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12%\n" +
 	"\x04type\x18\x03 \x01(\x0e2\x11.chat.v1.ChatTypeR\x04type\x12\x1d\n" +
 	"\n" +
-	"created_by\x18\x04 \x01(\tR\tcreatedBy\x12\x1d\n" +
+	"created_by\x18\x04 \x01(\x03R\tcreatedBy\x12\x1d\n" +
 	"\n" +
 	"avatar_url\x18\x05 \x01(\tR\tavatarUrl\x12#\n" +
 	"\rmembers_count\x18\x06 \x01(\x05R\fmembersCount\x123\n" +
@@ -2438,7 +2437,7 @@ const file_chat_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"R\n" +
 	"\x0eGetChatRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12'\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12'\n" +
 	"\x0finclude_members\x18\x02 \x01(\bR\x0eincludeMembers\">\n" +
 	"\x0fGetChatsRequest\x12+\n" +
 	"\x06filter\x18\x01 \x01(\v2\x13.chat.v1.ChatFilterR\x06filter\"\x91\x01\n" +
@@ -2446,29 +2445,29 @@ const file_chat_proto_rawDesc = "" +
 	"ChatFilter\x12%\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x11.chat.v1.ChatTypeR\x04type\x12\x16\n" +
 	"\x06search\x18\x02 \x01(\tR\x06search\x12\x19\n" +
-	"\bchat_ids\x18\x03 \x03(\tR\achatIds\x12)\n" +
+	"\bchat_ids\x18\x03 \x03(\x03R\achatIds\x12)\n" +
 	"\x10include_archived\x18\x04 \x01(\bR\x0fincludeArchived\"X\n" +
 	"\x10GetChatsResponse\x12#\n" +
 	"\x05chats\x18\x01 \x03(\v2\r.chat.v1.ChatR\x05chats\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x03R\n" +
 	"totalCount\"\x8a\x01\n" +
 	"\x11UpdateChatRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
 	"\x04name\x18\x02 \x01(\tH\x00R\x04name\x88\x01\x01\x12(\n" +
 	"\ravatar_base64\x18\x03 \x01(\tH\x01R\favatarBase64\x88\x01\x01B\a\n" +
 	"\x05_nameB\x10\n" +
 	"\x0e_avatar_base64\"\x86\x01\n" +
 	"\x10AddMemberRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12!\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12!\n" +
 	"\x04role\x18\x03 \x01(\x0e2\r.chat.v1.RoleR\x04role\x12\x1d\n" +
 	"\n" +
-	"invited_by\x18\x04 \x01(\tR\tinvitedBy\"G\n" +
+	"invited_by\x18\x04 \x01(\x03R\tinvitedBy\"G\n" +
 	"\x13RemoveMemberRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"[\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"[\n" +
 	"\x11GetMembersRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12-\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12-\n" +
 	"\x06filter\x18\x02 \x01(\v2\x15.chat.v1.MemberFilterR\x06filter\"I\n" +
 	"\fMemberFilter\x12!\n" +
 	"\x04role\x18\x01 \x01(\x0e2\r.chat.v1.RoleR\x04role\x12\x16\n" +
@@ -2478,15 +2477,15 @@ const file_chat_proto_rawDesc = "" +
 	"\vtotal_count\x18\x02 \x01(\x03R\n" +
 	"totalCount\"n\n" +
 	"\x17UpdateMemberRoleRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12!\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12!\n" +
 	"\x04role\x18\x03 \x01(\x0e2\r.chat.v1.RoleR\x04role\"D\n" +
 	"\x10GetMemberRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xcf\x02\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\xcf\x02\n" +
 	"\x06Member\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
-	"\achat_id\x18\x02 \x01(\tR\x06chatId\x12!\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x17\n" +
+	"\achat_id\x18\x02 \x01(\x03R\x06chatId\x12!\n" +
 	"\x04role\x18\x03 \x01(\x0e2\r.chat.v1.RoleR\x04role\x127\n" +
 	"\tjoined_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\bjoinedAt\x12<\n" +
 	"\flast_read_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
@@ -2497,13 +2496,13 @@ const file_chat_proto_rawDesc = "" +
 	"\n" +
 	"avatar_url\x18\t \x01(\tR\tavatarUrl\"C\n" +
 	"\x0fIsMemberRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"R\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"R\n" +
 	"\x10IsMemberResponse\x12\x1b\n" +
 	"\tis_member\x18\x01 \x01(\bR\bisMember\x12!\n" +
 	"\x04role\x18\x02 \x01(\x0e2\r.chat.v1.RoleR\x04role\"`\n" +
 	"\x13GetUserChatsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x120\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x120\n" +
 	"\x14include_last_message\x18\x02 \x01(\bR\x12includeLastMessage\"i\n" +
 	"\x14GetUserChatsResponse\x120\n" +
 	"\n" +
@@ -2517,10 +2516,10 @@ const file_chat_proto_rawDesc = "" +
 	"\flast_message\x18\x03 \x01(\v2\x10.chat.v1.MessageR\vlastMessage\x12!\n" +
 	"\funread_count\x18\x04 \x01(\x03R\vunreadCount\"g\n" +
 	"\x19UpdateChatSettingsRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x121\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x121\n" +
 	"\bsettings\x18\x02 \x01(\v2\x15.chat.v1.ChatSettingsR\bsettings\"1\n" +
 	"\x16GetChatSettingsRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\"\xa3\x02\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\"\xa3\x02\n" +
 	"\fChatSettings\x12\x1d\n" +
 	"\n" +
 	"is_private\x18\x01 \x01(\bR\tisPrivate\x125\n" +
@@ -2532,14 +2531,14 @@ const file_chat_proto_rawDesc = "" +
 	"\blanguage\x18\x06 \x01(\tR\blanguage\x12'\n" +
 	"\x0fis_announcement\x18\a \x01(\bR\x0eisAnnouncement\"\x88\x01\n" +
 	"\x17CreateInviteLinkRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x19\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x19\n" +
 	"\bmax_uses\x18\x02 \x01(\x05R\amaxUses\x129\n" +
 	"\n" +
 	"expires_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"\xc7\x02\n" +
 	"\n" +
 	"InviteLink\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
-	"\achat_id\x18\x02 \x01(\tR\x06chatId\x12\x12\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\achat_id\x18\x02 \x01(\x03R\x06chatId\x12\x12\n" +
 	"\x04code\x18\x03 \x01(\tR\x04code\x12\x10\n" +
 	"\x03url\x18\x04 \x01(\tR\x03url\x12\x19\n" +
 	"\bmax_uses\x18\x05 \x01(\x05R\amaxUses\x12\x1d\n" +
@@ -2550,29 +2549,29 @@ const file_chat_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"created_by\x18\t \x01(\tR\tcreatedBy\x12\x1b\n" +
+	"created_by\x18\t \x01(\x03R\tcreatedBy\x12\x1b\n" +
 	"\tis_active\x18\n" +
 	" \x01(\bR\bisActive\"S\n" +
 	"\x17JoinChatByInviteRequest\x12\x1f\n" +
 	"\vinvite_code\x18\x01 \x01(\tR\n" +
 	"inviteCode\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"O\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"O\n" +
 	"\x17RevokeInviteLinkRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x1b\n" +
-	"\tinvite_id\x18\x02 \x01(\tR\binviteId\"Z\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x1b\n" +
+	"\tinvite_id\x18\x02 \x01(\x03R\binviteId\"Z\n" +
 	"\x16GetChatInternalRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12'\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12'\n" +
 	"\x0finclude_members\x18\x02 \x01(\bR\x0eincludeMembers\"\xc8\x01\n" +
 	"\fChatInternal\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12%\n" +
 	"\x04type\x18\x03 \x01(\x0e2\x11.chat.v1.ChatTypeR\x04type\x12\x1b\n" +
 	"\tis_active\x18\x04 \x01(\bR\bisActive\x12\x1d\n" +
 	"\n" +
-	"member_ids\x18\x05 \x03(\tR\tmemberIds\x121\n" +
+	"member_ids\x18\x05 \x03(\x03R\tmemberIds\x121\n" +
 	"\bsettings\x18\x06 \x01(\v2\x15.chat.v1.ChatSettingsR\bsettings\"4\n" +
 	"\x17GetChatsInternalRequest\x12\x19\n" +
-	"\bchat_ids\x18\x01 \x03(\tR\achatIds\"\xaf\x01\n" +
+	"\bchat_ids\x18\x01 \x03(\x03R\achatIds\"\xaf\x01\n" +
 	"\x18GetChatsInternalResponse\x12B\n" +
 	"\x05chats\x18\x01 \x03(\v2,.chat.v1.GetChatsInternalResponse.ChatsEntryR\x05chats\x1aO\n" +
 	"\n" +
@@ -2580,8 +2579,8 @@ const file_chat_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12+\n" +
 	"\x05value\x18\x02 \x01(\v2\x15.chat.v1.ChatInternalR\x05value:\x028\x01\"\x99\x01\n" +
 	"\x1bValidateMemberAccessRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12H\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12H\n" +
 	"\x13required_permission\x18\x03 \x01(\x0e2\x17.chat.v1.PermissionTypeR\x12requiredPermission\"x\n" +
 	"\x1cValidateMemberAccessResponse\x12\x1d\n" +
 	"\n" +
@@ -2589,14 +2588,14 @@ const file_chat_proto_rawDesc = "" +
 	"\x04role\x18\x02 \x01(\x0e2\r.chat.v1.RoleR\x04role\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\"h\n" +
 	"\x15UpdateLastReadRequest\x12\x17\n" +
-	"\achat_id\x18\x01 \x01(\tR\x06chatId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1d\n" +
+	"\achat_id\x18\x01 \x01(\x03R\x06chatId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1d\n" +
 	"\n" +
-	"message_id\x18\x03 \x01(\tR\tmessageId\"\xa4\x01\n" +
+	"message_id\x18\x03 \x01(\x03R\tmessageId\"\xa4\x01\n" +
 	"\aMessage\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
-	"\achat_id\x18\x02 \x01(\tR\x06chatId\x12\x1b\n" +
-	"\tsender_id\x18\x03 \x01(\tR\bsenderId\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\achat_id\x18\x02 \x01(\x03R\x06chatId\x12\x1b\n" +
+	"\tsender_id\x18\x03 \x01(\x03R\bsenderId\x12\x18\n" +
 	"\acontent\x18\x04 \x01(\tR\acontent\x129\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt*\xa9\x01\n" +

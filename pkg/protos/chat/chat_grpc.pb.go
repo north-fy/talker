@@ -43,8 +43,6 @@ const (
 // ChatServiceClient is the client API for ChatService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// ==================== CHAT SERVICE ====================
 type ChatServiceClient interface {
 	// Управление чатами
 	CreateChat(ctx context.Context, in *CreateChatRequest, opts ...grpc.CallOption) (*Chat, error)
@@ -251,8 +249,6 @@ func (c *chatServiceClient) ValidateMemberAccess(ctx context.Context, in *Valida
 // ChatServiceServer is the server API for ChatService service.
 // All implementations must embed UnimplementedChatServiceServer
 // for forward compatibility.
-//
-// ==================== CHAT SERVICE ====================
 type ChatServiceServer interface {
 	// Управление чатами
 	CreateChat(context.Context, *CreateChatRequest) (*Chat, error)

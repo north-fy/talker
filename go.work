@@ -5,4 +5,5 @@ use (
 	./server-gateway
 	./services/user
 	./services/message
+	./services/chat
 )
