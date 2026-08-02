@@ -217,3 +217,12 @@ type MessageResponse struct {
 	Content   string
 	CreatedAt time.Time
 }
+
+type MemberDB struct {
+	ChatID int64
+	UserID int64
+	Role Role
+	JoinedAt time.Time
+	LastReadAt time.Time
+	UnreadCount int64
+}

@@ -8,6 +8,7 @@ import (
 type ChatService interface {
 	// TODO: implement
 	ChatFuncService
+	MemberService
 }
 
 type serverAPI struct {

@@ -13,8 +13,6 @@ jobs:
     strategy:
       matrix:
         module:
-          - path: .
-            name: root
           - path: server-gateway
             name: server-gateway
           - path: services/user
@@ -50,8 +48,6 @@ jobs:
     strategy:
       matrix:
         module:
-          - path: .
-            name: root
           - path: server-gateway
             name: server-gateway
           - path: services/user
@@ -85,8 +81,6 @@ jobs:
     strategy:
       matrix:
         module:
-          - path: .
-            name: root
           - path: server-gateway
             name: server-gateway
           - path: services/user

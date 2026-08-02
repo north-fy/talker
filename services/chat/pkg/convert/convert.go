@@ -1,6 +1,8 @@
 package convert
 
 import (
+	"strconv"
+
 	chatv1 "github.com/north-fy/talker/pkg/protos/chat"
 	"github.com/north-fy/talker/services/chat/internal/domain/models"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -17,5 +19,21 @@ func ConvertChatToProto(chat *models.Chat) *chatv1.Chat {
 		LastMessage: nil,
 		CreatedAt: timestamppb.New(chat.CreatedAt),
 		UpdatedAt: timestamppb.New(chat.UpdatedAt),
+	}
+}
+
+func ConvertMemberToProto(m *models.Member) *chatv1.Member {
+	r, _ := strconv.Atoi(m.Role)
+
+	return &chatv1.Member{
+		UserId: m.UserID,
+		ChatId: m.ChatID,
+		Role: chatv1.Role(r),
+		JoinedAt: timestamppb.New(m.JoinedAt),
+		LastReadAt: timestamppb.New(m.LastReadAt),
+		UnreadCount: m.UnreadCount,
+		Username: m.Username,
+		FullName: m.FullName,
+		AvatarUrl: m.AvatarURL,
 	}
 }
