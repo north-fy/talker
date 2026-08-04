@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/north-fy/talker/services/user/internal/config"
+	"github.com/north-fy/talker/services/user/internal/domain"
 	"github.com/north-fy/talker/services/user/internal/domain/models"
 	"github.com/north-fy/talker/services/user/pkg/utils"
 	"go.uber.org/zap"
@@ -20,6 +21,7 @@ type Service struct {
 type Storage interface {
 	InsertUser(ctx context.Context, user models.User) (int64, error)
 	SelectUserByEmail(ctx context.Context, email string) (models.User, error)
+	SelectUsersByIds(ctx context.Context, ids []int64) ([]domain.User, error)
 }
 
 func NewService(log *zap.Logger, storage Storage) *Service {
@@ -108,6 +110,20 @@ func (s *Service) GetMe(ctx context.Context, token string) (models.User, error) 
 		FirstName: claims.User.FirstName,
 		LastName:  claims.User.LastName,
 		Email:     claims.User.Email,
+	}, nil
+}
+
+func (s *Service) GetUsers(ctx context.Context, req domain.GetUsersRequest) (domain.GetUsersResponse, error) {
+	log := s.log.With(zap.Any("request", req))
+
+	users, err := s.storage.SelectUsersByIds(ctx, req.IDs)
+	if err != nil {
+		log.Error("failed to select users", zap.Error(err))
+		return domain.GetUsersResponse{}, err
+	}
+
+	return domain.GetUsersResponse{
+		Users: users,
 	}, nil
 }
 

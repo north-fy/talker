@@ -12,7 +12,7 @@ proto-deps:
 .PHONY: gen
 gen:
 	protoc \
-      --go_out=./pkg/protos/chat --go_opt=paths=source_relative \
-      --go-grpc_out=./pkg/protos/chat --go-grpc_opt=paths=source_relative \
+      --go_out=./pkg/protos/user --go_opt=paths=source_relative \
+      --go-grpc_out=./pkg/protos/user --go-grpc_opt=paths=source_relative \
       --proto_path=./pkg/protos \
-      ./pkg/protos/chat.proto
+      ./pkg/protos/user.proto

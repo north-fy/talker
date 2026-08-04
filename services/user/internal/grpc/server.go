@@ -4,6 +4,7 @@ import (
 	"context"
 
 	userv1 "github.com/north-fy/talker/pkg/protos/user"
+	"github.com/north-fy/talker/services/user/internal/domain"
 	"github.com/north-fy/talker/services/user/internal/domain/models"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -14,6 +15,7 @@ type UserService interface {
 	Register(ctx context.Context, user models.User) (int64, error)
 	Login(ctx context.Context, user models.UserLogin) (models.Session, error)
 	GetMe(ctx context.Context, token string) (models.User, error)
+	GetUsers(ctx context.Context, req domain.GetUsersRequest) (domain.GetUsersResponse, error)
 	ValidateToken(ctx context.Context, token string) (bool, error)
 }
 
@@ -75,6 +77,33 @@ func (s *serverAPI) GetMe(ctx context.Context, req *userv1.GetMeRequest) (*userv
 		FirstName: userInfo.FirstName,
 		LastName:  userInfo.LastName,
 		Email:     userInfo.Email,
+	}, nil
+}
+
+func (s *serverAPI) GetUsers(ctx context.Context, req *userv1.GetUsersRequest) (*userv1.GetUsersResponse, error) {
+	userReq := domain.GetUsersRequest{
+		IDs: req.GetUserIds(),
+	}
+
+	users, err := s.user.GetUsers(ctx, userReq)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+
+	protoUsers := make([]*userv1.User, 0, len(users.Users))
+	for _, user := range users.Users {
+		protoUser := &userv1.User{
+			UserId: user.ID,
+			FirstName: user.FirstName,
+			LastName: user.LastName,
+			Username: user.Username,
+		}
+
+		protoUsers = append(protoUsers, protoUser)
+	}
+
+	return &userv1.GetUsersResponse{
+		Users: protoUsers,
 	}, nil
 }
 
