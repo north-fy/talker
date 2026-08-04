@@ -118,7 +118,7 @@ func (s *Storage) GetMember(ctx context.Context, req dto.GetMemberRequest) (dto.
 	return member, nil
 }
 
-func (s *Storage) GetMembers(ctx context.Context, req dto.GetMembersRequest) ([]*dto.MemberDB, error) {
+func (s *Storage) GetMembers(ctx context.Context, req dto.GetMembersRequest) (dto.GetMembersDBResponse, error) {
 	query := `
 	SELECT chat_id, user_id, role, joined_at, last_read_at, unread_count
 	FROM chat_members
@@ -127,10 +127,14 @@ func (s *Storage) GetMembers(ctx context.Context, req dto.GetMembersRequest) ([]
 
 	rows, err := s.conn.Query(ctx, query, req.ChatID)
 	if err != nil {
-		return nil, err
+		return dto.GetMembersDBResponse{}, err
 	}
 
-	var members []*dto.MemberDB
+	var (
+		members []*dto.MemberDB
+		ids     []int64
+	)
+
 	for rows.Next() {
 		var member dto.MemberDB
 		if err := rows.Scan(
@@ -140,11 +144,15 @@ func (s *Storage) GetMembers(ctx context.Context, req dto.GetMembersRequest) ([]
 			&member.JoinedAt,
 			&member.LastReadAt,
 			&member.UnreadCount); err != nil {
-			return nil, err
+			return dto.GetMembersDBResponse{}, err
 		}
 
 		members = append(members, &member)
+		ids = append(ids, member.UserID)
 	}
 
-	return members, nil
+	return dto.GetMembersDBResponse{
+		Members: members,
+		IDs:     ids,
+	}, nil
 }
