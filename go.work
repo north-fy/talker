@@ -3,7 +3,7 @@ go 1.26.1
 use (
 	.
 	./server-gateway
-	./services/user
-	./services/message
 	./services/chat
+	./services/message
+	./services/user
 )

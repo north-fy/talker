@@ -32,7 +32,8 @@ func toGRPC(err error) error {
 	// PermissionDenied
 	case errors.Is(err, domain.ErrAccessDenied),
 		errors.Is(err, domain.ErrNotAuthenticated),
-		errors.Is(err, domain.ErrInsufficientRole):
+		errors.Is(err, domain.ErrInsufficientRole),
+		errors.Is(err, domain.ErrCannotModifyOwner):
 		return status.Error(codes.PermissionDenied, err.Error())
 
 	// FailedPrecondition

@@ -100,7 +100,7 @@ type GetMembersResponse struct {
 type UpdateMemberRoleRequest struct {
 	ChatID int64 `validate:"required"`
 	UserID int64 `validate:"required"`
-	Role   Role  `validate:"required"`
+	Role   Role  `validate:"required,oneof=1 2 3"`
 }
 
 type GetMemberRequest struct {
@@ -129,10 +129,16 @@ type GetUserChatsResponse struct {
 }
 
 type UserChatResponse struct {
-	Chat        *models.Chat
-	MemberInfo  *models.Member
-	LastMessage *MessageResponse
-	UnreadCount int64
+	Chat        *models.Chat     `json:"chat"`
+	MemberInfo  *models.Member   `json:"member_info"`
+	LastMessage *MessageResponse `json:"last_message"`
+	UnreadCount int64            `json:"unread_count"`
+}
+
+// UserChatDB объединяет данные чата и участника для построения ответа GetUserChats.
+type UserChatDB struct {
+	Chat   models.Chat
+	Member MemberDB
 }
 
 type CreateInviteLinkRequest struct {
@@ -161,13 +167,13 @@ type GetChatSettingsRequest struct {
 }
 
 type ChatSettings struct {
-	IsPrivate            bool
-	AllowMessagesFromAll bool
-	AllowMedia           bool
-	AllowReactions       bool
-	MessageTTLSeconds    int32  `validate:"min=0"`
-	Language             string `validate:"max=10"`
-	IsAnnouncement       bool
+	IsPrivate            bool   `json:"is_private"`
+	AllowMessagesFromAll bool   `json:"allow_messages_from_all"`
+	AllowMedia           bool   `json:"allow_media"`
+	AllowReactions       bool   `json:"allow_reactions"`
+	MessageTTLSeconds    int32  `json:"message_ttl_seconds" validate:"min=0"`
+	Language             string `json:"language" validate:"max=10"`
+	IsAnnouncement       bool   `json:"is_announcement"`
 }
 
 type GetChatInternalRequest struct {
@@ -211,18 +217,18 @@ type UpdateLastReadRequest struct {
 }
 
 type MessageResponse struct {
-	ID        int64
-	ChatID    int64
-	SenderID  int64
-	Content   string
-	CreatedAt time.Time
+	ID        int64     `json:"id"`
+	ChatID    int64     `json:"chat_id"`
+	SenderID  int64     `json:"sender_id"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type MemberDB struct {
-	ChatID int64
-	UserID int64
-	Role Role
-	JoinedAt time.Time
-	LastReadAt time.Time
-	UnreadCount int64
+	ChatID      int64     `json:"chat_id"`
+	UserID      int64     `json:"user_id"`
+	Role        Role      `json:"role"`
+	JoinedAt    time.Time `json:"joined_at"`
+	LastReadAt  time.Time `json:"last_read_at"`
+	UnreadCount int64     `json:"unread_count"`
 }

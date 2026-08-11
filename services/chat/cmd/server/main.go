@@ -26,7 +26,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	server := app.New(ctx, logger, cfg.GRPCCfg.Port, cfg.PostgresCfg)
+	server := app.New(ctx, logger, cfg.GRPCCfg.Port, cfg.PostgresCfg, cfg.RedisCfg, cfg.UserSrvCfg.Addr, cfg.MessageSrvCfg.Addr)
 	go server.GRPCSrv.MustRun()
 
 	sigChan := make(chan os.Signal, 1)

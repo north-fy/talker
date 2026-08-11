@@ -82,8 +82,8 @@ func (s *serverAPI) UpdateChat(ctx context.Context, req *chatv1.UpdateChatReques
 	avatar := req.GetAvatarBase64()
 
 	chatReq := dto.UpdateChatRequest{
-		ChatID: req.GetChatId(),
-		Name:   &name,
+		ChatID:       req.GetChatId(),
+		Name:         &name,
 		AvatarBase64: &avatar,
 	}
 

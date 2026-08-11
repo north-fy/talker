@@ -7,9 +7,11 @@ import (
 )
 
 type Config struct {
-	PostgresCfg PostgresCfg `env:"POSTGRES_"`
-	GRPCCfg     GRPCCfg     `env:"GRPC_"`
-	RedisCfg    RedisCfg    `env:"REDIS_"`
+	PostgresCfg   PostgresCfg   `env:"POSTGRES_"`
+	GRPCCfg       GRPCCfg       `env:"GRPC_"`
+	RedisCfg      RedisCfg      `env:"REDIS_"`
+	UserSrvCfg    UserSrvCfg    `env:"USER_SRV_"`
+	MessageSrvCfg MessageSrvCfg `env:"MESSAGE_SRV_"`
 }
 
 type PostgresCfg struct {
@@ -31,6 +33,14 @@ type RedisCfg struct {
 	ReadTimeout  time.Duration `env:"READ_TIMEOUT"`
 	WriteTimeout time.Duration `env:"WRITE_TIMEOUT"`
 	DB           int           `env:"DB"`
+}
+
+type UserSrvCfg struct {
+	Addr string `env:"ADDR"`
+}
+
+type MessageSrvCfg struct {
+	Addr string `env:"ADDR"`
 }
 
 func (c *Config) Load() error {

@@ -97,7 +97,7 @@ func (s *serverAPI) GetMembers(ctx context.Context, req *chatv1.GetMembersReques
 	}
 
 	return &chatv1.GetMembersResponse{
-		Members: members,
+		Members:    members,
 		TotalCount: resp.TotalCount,
 	}, nil
 }

@@ -6,9 +6,11 @@ import (
 )
 
 type ChatService interface {
-	// TODO: implement
 	ChatFuncService
 	MemberService
+	FeatureService
+	InternalService
+	InviteService
 }
 
 type serverAPI struct {

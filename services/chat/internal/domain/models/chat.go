@@ -3,38 +3,38 @@ package models
 import "time"
 
 type Chat struct {
-	ID          int64
-	Name        string
-	Type        int32
-	CreatedBy   int64
-	AvatarURL   string
-	MembersCount int32
-	IsActive    bool
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID           int64     `json:"id"`
+	Name         string    `json:"name"`
+	Type         int32     `json:"type"`
+	CreatedBy    int64     `json:"created_by"`
+	AvatarURL    string    `json:"avatar_url"`
+	MembersCount int32     `json:"members_count"`
+	IsActive     bool      `json:"is_active"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type Member struct {
-	UserID     int64
-	ChatID     int64
-	Role       string
-	JoinedAt   time.Time
-	LastReadAt time.Time
-	UnreadCount int64
-	Username   string
-	FullName   string
-	AvatarURL  string
+	UserID      int64     `json:"user_id"`
+	ChatID      int64     `json:"chat_id"`
+	Role        string    `json:"role"`
+	JoinedAt    time.Time `json:"joined_at"`
+	LastReadAt  time.Time `json:"last_read_at"`
+	UnreadCount int64     `json:"unread_count"`
+	Username    string    `json:"username"`
+	FullName    string    `json:"full_name"`
+	AvatarURL   string    `json:"avatar_url"`
 }
 
 type InviteLink struct {
-	ID        int64
-	ChatID    int64
-	Code      string
-	URL       string
-	MaxUses   int32
-	UsedCount int32
-	ExpiresAt time.Time
-	CreatedAt time.Time
-	CreatedBy string
-	IsActive  bool
+	ID        int64     `json:"id"`
+	ChatID    int64     `json:"chat_id"`
+	Code      string    `json:"code"`
+	URL       string    `json:"url"`
+	MaxUses   int32     `json:"max_uses"`
+	UsedCount int32     `json:"used_count"`
+	ExpiresAt time.Time `json:"expires_at"`
+	CreatedAt time.Time `json:"created_at"`
+	CreatedBy int64     `json:"created_by"`
+	IsActive  bool      `json:"is_active"`
 }
