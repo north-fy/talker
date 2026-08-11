@@ -35,4 +35,3 @@ func (s *Storage) Close() {
 	s.conn.Close()
 	return
 }
-

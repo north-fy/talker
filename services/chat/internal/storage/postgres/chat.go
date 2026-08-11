@@ -9,52 +9,39 @@ import (
 	"github.com/north-fy/talker/services/chat/internal/domain/models"
 )
 
-/*
-CREATE TABLE chats (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL DEFAULT 'group',
-    created_by UUID NOT NULL,
-    avatar_url TEXT,
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP
-);
-
-CREATE TABLE chat_members (
-    chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'member',
-    joined_at TIMESTAMP DEFAULT NOW(),
-    last_read_at TIMESTAMP,
-    unread_count BIGINT DEFAULT 0,
-    PRIMARY KEY (chat_id, user_id)
-);
-*/
-
 func (s *Storage) InsertChat(ctx context.Context, req dto.CreateChatRequest) (models.Chat, error) {
-	// TODO: добавить permisions для владельца чата
+	if len(req.MemberIDs) == 0 {
+		return models.Chat{}, fmt.Errorf("chat must have at least one member")
+	}
+
+	createdBy := req.MemberIDs[0]
+
 	query := `
 	WITH new_chat AS (
-		INSERT INTO chats (name, type, avatar_url)
-		VALUES ($1, $2, $3)
-		RETURNING id, name, type, avatar_url, is_active, created_at, updated_at
+		INSERT INTO chats (name, type, created_by, avatar_url)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, name, type, created_by, avatar_url, is_active, created_at, updated_at
 	),
 	new_members AS (
 		INSERT INTO chat_members (chat_id, user_id, role)
-		SELECT nc.id, m.uid, 'member'
-		FROM new_chat nc, unnest($4::bigint[]) AS m(uid)
+		SELECT nc.id, m.uid, CASE WHEN m.uid = $3 THEN 4 ELSE 1 END
+		FROM new_chat nc, unnest($5::bigint[]) AS m(uid)
+	),
+	new_settings AS (
+		INSERT INTO chat_settings (chat_id)
+		SELECT nc.id FROM new_chat nc
 	)
-	SELECT nc.id, nc.name, nc.type, nc.avatar_url, nc.is_active, nc.created_at, nc.updated_at,
+	SELECT nc.id, nc.name, nc.type, nc.created_by, nc.avatar_url, nc.is_active, nc.created_at, nc.updated_at,
 	       (SELECT COUNT(*) FROM chat_members WHERE chat_id = nc.id)
 	FROM new_chat nc
 	`
 
 	var chat models.Chat
-	err := s.conn.QueryRow(ctx, query, req.Name, req.Type, req.AvatarBase64, req.MemberIDs).Scan(
+	err := s.conn.QueryRow(ctx, query, req.Name, req.Type, createdBy, req.AvatarBase64, req.MemberIDs).Scan(
 		&chat.ID,
 		&chat.Name,
 		&chat.Type,
+		&chat.CreatedBy,
 		&chat.AvatarURL,
 		&chat.IsActive,
 		&chat.CreatedAt,
@@ -216,4 +203,50 @@ func (s *Storage) UpdateChat(ctx context.Context, req dto.UpdateChatRequest) (mo
 	}
 
 	return chat, nil
+}
+
+func (s *Storage) SelectChatsByIDs(ctx context.Context, ids []int64) ([]*models.Chat, error) {
+	if len(ids) == 0 {
+		return []*models.Chat{}, nil
+	}
+
+	query := `
+	SELECT c.id, c.name, c.type, c.created_by, c.avatar_url,
+	       (SELECT COUNT(*) FROM chat_members WHERE chat_id = c.id),
+	       c.is_active, c.created_at, c.updated_at
+	FROM chats c
+	WHERE c.id = ANY($1)
+	ORDER BY c.created_at DESC
+	`
+
+	rows, err := s.conn.Query(ctx, query, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var chats []*models.Chat
+	for rows.Next() {
+		var chat models.Chat
+		if err := rows.Scan(
+			&chat.ID,
+			&chat.Name,
+			&chat.Type,
+			&chat.CreatedBy,
+			&chat.AvatarURL,
+			&chat.MembersCount,
+			&chat.IsActive,
+			&chat.CreatedAt,
+			&chat.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		chats = append(chats, &chat)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return chats, nil
 }
