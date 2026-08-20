@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  server-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: server-gateway
+    environment:
+      HTTP_PORT: 8080
+      USER_SRV_ADDR: host.docker.internal:50051
+      MESSAGE_SRV_ADDR: host.docker.internal:50052
+      CHAT_SRV_ADDR: host.docker.internal:50053
+      JWT_SECRET: change-me-secret
+    ports:
+      - "8080:8080"
+    networks:
+      - gateway-network
+
+networks:
+  gateway-network:
+    driver: bridge
