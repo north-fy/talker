@@ -16,3 +16,39 @@ gen:
       --go-grpc_out=./pkg/protos/user --go-grpc_opt=paths=source_relative \
       --proto_path=./pkg/protos \
       ./pkg/protos/user.proto
+# ---------- Local k8s (minikube) ----------
+MINIKUBE ?= minikube
+KUBECTL  ?= kubectl
+NS       := talker
+IMG_TAG  := dev
+SERVICES := user message chat
+
+.PHONY: cluster-up cluster-down images load deploy undeploy status logs
+
+cluster-up:
+	$(MINIKUBE) start --driver=docker
+
+cluster-down:
+	$(MINIKUBE) stop
+
+images:
+	@for s in $(SERVICES); do \
+		docker build -f services/$$s/Dockerfile -t talker/$$s:$(IMG_TAG) . ; \
+	done
+
+load:
+	@for s in $(SERVICES); do \
+		$(MINIKUBE) image load talker/$$s:$(IMG_TAG) ; \
+	done
+
+deploy:
+	$(KUBECTL) apply -f deployment/
+
+undeploy:
+	$(KUBECTL) delete -f deployment/ --ignore-not-found
+
+status:
+	$(KUBECTL) -n $(NS) get pods
+
+logs:
+	$(KUBECTL) -n $(NS) logs -l app=chat-service --tail=50
