@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ./services/chat/docker-compose.yml -o ./deployment/chat
+    kompose.version: 1.38.0 (a8f5d1cbd)
+  labels:
+    io.kompose.service: chat-service
+  name: chat-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: chat-service
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f ./services/chat/docker-compose.yml -o ./deployment/chat
+        kompose.version: 1.38.0 (a8f5d1cbd)
+      labels:
+        io.kompose.service: chat-service
+    spec:
+      containers:
+        - env:
+            - name: GRPC_PORT
+              value: "50053"
+            - name: MESSAGE_SRV_ADDR
+              value: host.docker.internal:50052
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: postgres
+            - name: REDIS_DB
+              value: "0"
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PASSWORD
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_READ_TIMEOUT
+              value: 30s
+            - name: REDIS_WRITE_TIMEOUT
+              value: 30s
+            - name: USER_SRV_ADDR
+              value: host.docker.internal:50051
+          image: chat-service
+          name: chat-service
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 50053
+              protocol: TCP
+      restartPolicy: Always

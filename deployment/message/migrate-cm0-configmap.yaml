@@ -1,0 +1,55 @@
+apiVersion: v1
+data:
+  000001_create_message_table.down.sql: DROP TABLE messages;
+  000001_create_message_table.up.sql: |-
+    CREATE TABLE messages (
+        id UUID PRIMARY KEY,
+        chat_id UUID NOT NULL,
+        sender_id UUID NOT NULL,
+        content TEXT,
+        type VARCHAR(50) DEFAULT 'text',
+        reply_to UUID,
+        attachments TEXT[],
+        reactions JSONB DEFAULT '{}',
+        is_edited BOOLEAN DEFAULT false,
+        is_deleted BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP
+    );
+  000002_create_readreceipts_table.down.sql: DROP TABLE read_receipts;
+  000002_create_readreceipts_table.up.sql: |-
+    CREATE TABLE read_receipts (
+        chat_id UUID NOT NULL,
+        user_id UUID NOT NULL,
+        last_read_message_id UUID,
+        updated_at TIMESTAMP DEFAULT NOW(),
+        PRIMARY KEY (chat_id, user_id)
+    );
+  000003_add_fulltext_search.down.sql: |
+    DROP TRIGGER IF EXISTS messages_content_tsvector_trigger ON messages;
+    DROP FUNCTION IF EXISTS messages_content_tsvector_update();
+    DROP INDEX IF EXISTS idx_messages_content_fts;
+    ALTER TABLE messages DROP COLUMN IF EXISTS content_tsvector;
+  000003_add_fulltext_search.up.sql: |
+    ALTER TABLE messages ADD COLUMN content_tsvector tsvector;
+
+    CREATE INDEX idx_messages_content_fts ON messages USING GIN (content_tsvector);
+
+    CREATE OR REPLACE FUNCTION messages_content_tsvector_update() RETURNS trigger AS $$
+    BEGIN
+        NEW.content_tsvector := to_tsvector('russian', COALESCE(NEW.content, ''));
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER messages_content_tsvector_trigger
+        BEFORE INSERT OR UPDATE OF content ON messages
+        FOR EACH ROW
+        EXECUTE FUNCTION messages_content_tsvector_update();
+
+    UPDATE messages SET content_tsvector = to_tsvector('russian', COALESCE(content, ''));
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: migrate
+  name: migrate-cm0

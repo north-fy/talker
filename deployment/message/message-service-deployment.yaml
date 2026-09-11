@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ./services/message/docker-compose.yml -o ./deployment/message
+    kompose.version: 1.38.0 (a8f5d1cbd)
+  labels:
+    io.kompose.service: message-service
+  name: message-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: message-service
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f ./services/message/docker-compose.yml -o ./deployment/message
+        kompose.version: 1.38.0 (a8f5d1cbd)
+      labels:
+        io.kompose.service: message-service
+    spec:
+      containers:
+        - env:
+            - name: GRPC_PORT
+              value: "50052"
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: postgres
+            - name: REDIS_DB
+              value: "0"
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PASSWORD
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_READ_TIMEOUT
+              value: 30s
+            - name: REDIS_WRITE_TIMEOUT
+              value: 30s
+          image: message-service
+          name: message-service
+          ports:
+            - containerPort: 50052
+              protocol: TCP
+      restartPolicy: Always

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ./services/user/docker-compose.yml -o ./deployment/user
+    kompose.version: 1.38.0 (a8f5d1cbd)
+  labels:
+    io.kompose.service: migrate
+  name: migrate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: migrate
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f ./services/user/docker-compose.yml -o ./deployment/user
+        kompose.version: 1.38.0 (a8f5d1cbd)
+      labels:
+        io.kompose.service: migrate
+    spec:
+      containers:
+        - args:
+            - -path=/migrations
+            - -database=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+            - up
+          image: migrate/migrate:latest
+          name: user-migrate
+          volumeMounts:
+            - mountPath: /migrations
+              name: migrate-cm0
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            name: migrate-cm0
+          name: migrate-cm0
