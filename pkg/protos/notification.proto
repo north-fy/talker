@@ -12,8 +12,6 @@ service NotificationService {
   // Уведомления
   rpc GetNotifications(GetNotificationsRequest) returns (GetNotificationsResponse);
   rpc GetNotification(GetNotificationRequest) returns (Notification);
-  rpc MarkAsRead(MarkAsReadRequest) returns (Empty);
-  rpc MarkAllAsRead(MarkAllAsReadRequest) returns (Empty);
   rpc GetUnreadCount(GetUnreadCountRequest) returns (GetUnreadCountResponse);
 }
 
@@ -63,16 +61,6 @@ message GetNotificationRequest {
   int64 notification_id = 1;
 }
 
-// Отметить как прочитанное
-message MarkAsReadRequest {
-  int64 user_id = 1;
-  int64 notification_id = 2;
-}
-
-message MarkAllAsReadRequest {
-  int64 user_id = 1;
-}
-
 // Количество непрочитанных
 message GetUnreadCountRequest {
   int64 user_id = 1;
@@ -80,13 +68,4 @@ message GetUnreadCountRequest {
 
 message GetUnreadCountResponse {
   int32 count = 1;
-}
-
-// Отправка уведомления (внутренний метод для других сервисов)
-message SendNotificationRequest {
-  int64 user_id = 1;
-  NotificationType type = 2;
-  string title = 3;
-  string body = 4;
-  map<string, string> data = 5;       // chat_id, message_id и т.д.
 }
