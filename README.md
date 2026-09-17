@@ -21,9 +21,8 @@
     $ git clone https://github.com/north-fy/talker.git
     $ cd talker
     ```
-2. **Запускайте каждый сервис по отдельности**
+2. **Запустите все конфигурации**
    ```bash
-    $ cd ./services/chat
     $ make docker-up
    ```
 
@@ -32,10 +31,9 @@
     ```bash
     $ kubectl create namespace 'name'
     ```
-2.  **Запускайте каждый деплоймент по отдельности**
+2.  **Запустите все конфигурации**
     ```bash
-    $ cd ./deployment/chat
-    $ kubectl apply -f .
+    $ make k8s-up
     ```    
 
 ## License

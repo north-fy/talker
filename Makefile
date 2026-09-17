@@ -52,3 +52,15 @@ status:
 
 logs:
 	$(KUBECTL) -n $(NS) logs -l app=chat-service --tail=50
+
+# up via docker
+docker-up:
+	@for s in $(SERVICES); do \
+		docker-compose -f services/$$s/docker-compose.yml up -d; \
+	done
+
+# up via k8s
+k8s-up:
+	@for s in $(SERVICES); do \
+		kubectl apply -f deployment/$$s; \
+	done
