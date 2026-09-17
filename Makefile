@@ -12,10 +12,10 @@ proto-deps:
 .PHONY: gen
 gen:
 	protoc \
-      --go_out=./pkg/protos/user --go_opt=paths=source_relative \
-      --go-grpc_out=./pkg/protos/user --go-grpc_opt=paths=source_relative \
+      --go_out=./pkg/protos/notification --go_opt=paths=source_relative \
+      --go-grpc_out=./pkg/protos/notification --go-grpc_opt=paths=source_relative \
       --proto_path=./pkg/protos \
-      ./pkg/protos/user.proto
+      ./pkg/protos/notification.proto
 # ---------- Local k8s (minikube) ----------
 MINIKUBE ?= minikube
 KUBECTL  ?= kubectl

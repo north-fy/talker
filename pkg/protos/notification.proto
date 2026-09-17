@@ -1,0 +1,92 @@
+// proto/notification/notification.proto
+syntax = "proto3";
+
+package notification.v1;
+
+option go_package = "github.com/north-fy/talker/services/notification/pkg/protos/v1;notificationv1";
+
+import "timestamp.proto";
+
+// ==================== NOTIFICATION SERVICE ====================
+service NotificationService {
+  // Уведомления
+  rpc GetNotifications(GetNotificationsRequest) returns (GetNotificationsResponse);
+  rpc GetNotification(GetNotificationRequest) returns (Notification);
+  rpc MarkAsRead(MarkAsReadRequest) returns (Empty);
+  rpc MarkAllAsRead(MarkAllAsReadRequest) returns (Empty);
+  rpc GetUnreadCount(GetUnreadCountRequest) returns (GetUnreadCountResponse);
+}
+
+message Empty {}
+
+// ==================== ENTITIES ====================
+
+// Уведомление
+message Notification {
+  int64 id = 1;
+  int64 user_id = 2;                  // Кому адресовано
+  NotificationType type = 3;
+  string title = 4;
+  string body = 5;
+  map<string, string> data = 6;       // Доп. данные: chat_id, message_id и т.д.
+  bool is_read = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+enum NotificationType {
+  NOTIFICATION_TYPE_UNKNOWN = 0;
+  NOTIFICATION_TYPE_MESSAGE = 1;      // Новое сообщение
+  NOTIFICATION_TYPE_REACTION = 2;     // Реакция на сообщение
+  NOTIFICATION_TYPE_MENTION = 3;      // Упоминание пользователя
+  NOTIFICATION_TYPE_CHAT_INVITE = 4;  // Приглашение в чат
+  NOTIFICATION_TYPE_SYSTEM = 5;       // Системное уведомление
+}
+
+// ==================== REQUEST/RESPONSE MESSAGES ====================
+
+// Список уведомлений
+message GetNotificationsRequest {
+  int64 user_id = 1;
+  int32 limit = 2;                    // Максимум уведомлений (max 100)
+  int64 before = 3;                   // Пагинация: ID уведомления, до которого грузить
+  bool only_unread = 4;               // Только непрочитанные
+}
+
+message GetNotificationsResponse {
+  repeated Notification notifications = 1;
+  bool has_more = 2;
+  int32 unread_count = 3;             // Общее количество непрочитанных
+}
+
+// Одно уведомление
+message GetNotificationRequest {
+  int64 notification_id = 1;
+}
+
+// Отметить как прочитанное
+message MarkAsReadRequest {
+  int64 user_id = 1;
+  int64 notification_id = 2;
+}
+
+message MarkAllAsReadRequest {
+  int64 user_id = 1;
+}
+
+// Количество непрочитанных
+message GetUnreadCountRequest {
+  int64 user_id = 1;
+}
+
+message GetUnreadCountResponse {
+  int32 count = 1;
+}
+
+// Отправка уведомления (внутренний метод для других сервисов)
+message SendNotificationRequest {
+  int64 user_id = 1;
+  NotificationType type = 2;
+  string title = 3;
+  string body = 4;
+  map<string, string> data = 5;       // chat_id, message_id и т.д.
+}
